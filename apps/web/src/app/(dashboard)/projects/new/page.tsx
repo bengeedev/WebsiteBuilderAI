@@ -14,6 +14,9 @@ export type OnboardingData = {
   businessTagline: string;
   primaryColor: string;
   secondaryColor: string;
+  accentColor?: string;
+  headingFont: string;
+  bodyFont: string;
   logoUrl?: string;
 };
 
@@ -24,6 +27,8 @@ const initialData: OnboardingData = {
   businessTagline: "",
   primaryColor: "#2563eb",
   secondaryColor: "#1e293b",
+  headingFont: "Inter",
+  bodyFont: "Inter",
 };
 
 export default function NewProjectPage() {
