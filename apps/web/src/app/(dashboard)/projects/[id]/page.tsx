@@ -17,6 +17,9 @@ export default async function ProjectPage({ params }: Props) {
     redirect("/login");
   }
 
+  // Redirect to the new dashboard view
+  redirect(`/projects/${id}/dashboard`);
+
   const project = await prisma.project.findFirst({
     where: {
       id,
