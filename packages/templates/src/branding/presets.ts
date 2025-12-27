@@ -158,7 +158,7 @@ export const brandingPresets: BrandingPreset[] = [
     name: "Property Modern",
     description: "Clean for real estate agencies",
     colors: getColorPreset("blue-professional")!.colors,
-    typography: createTypography(getFontPairing("montserrat")!, { headingWeight: 600 }),
+    typography: createTypography(getFontPairing("bold-impact")!, { headingWeight: 600 }),
   },
 
   // Education & Learning

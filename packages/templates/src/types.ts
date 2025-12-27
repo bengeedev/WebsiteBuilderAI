@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+// Section types are defined in ./sections/types.ts
+import type { SectionType, SectionContent, SectionLayout } from "./sections/types";
 
 // ============================================
 // Branding Types
@@ -84,89 +85,6 @@ export type BrandingPreset = {
   colors: BrandColors;
   typography: Typography;
   description?: string;
-};
-
-// ============================================
-// Section Types
-// ============================================
-
-export type SectionType =
-  | "hero"
-  | "about"
-  | "features"
-  | "services"
-  | "menu"
-  | "portfolio"
-  | "gallery"
-  | "testimonials"
-  | "team"
-  | "pricing"
-  | "contact"
-  | "cta"
-  | "newsletter"
-  | "faq"
-  | "blog"
-  | "stats"
-  | "timeline"
-  | "clients"
-  | "process"
-  | "comparison";
-
-export type SectionItem = {
-  id: string;
-  title?: string;
-  description?: string;
-  icon?: string;
-  image?: string;
-  price?: string;
-  author?: string;
-  role?: string;
-  rating?: number;
-  link?: string;
-};
-
-export type SectionContent = {
-  id: string;
-  type: SectionType;
-  layout?: string;
-  title?: string;
-  subtitle?: string;
-  content?: string;
-  items?: SectionItem[];
-  cta?: {
-    text: string;
-    url: string;
-    variant?: "primary" | "secondary" | "outline";
-  };
-  secondaryCta?: {
-    text: string;
-    url: string;
-  };
-  backgroundImage?: string;
-  backgroundVideo?: string;
-  styles?: Record<string, string>;
-};
-
-export type SectionLayoutVariant = {
-  id: string;
-  name: string;
-  description: string;
-  thumbnail?: string;
-  requiredFields: string[];
-  optionalFields: string[];
-  defaultContent: Partial<SectionContent>;
-};
-
-export type SectionLayout = {
-  sectionType: SectionType;
-  variants: SectionLayoutVariant[];
-};
-
-export type SectionProps = {
-  content: SectionContent;
-  branding: BrandColors;
-  typography?: Typography;
-  className?: string;
 };
 
 // ============================================

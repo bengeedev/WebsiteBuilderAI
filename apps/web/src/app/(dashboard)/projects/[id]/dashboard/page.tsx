@@ -57,7 +57,18 @@ export default function ProjectDashboard() {
     }
   };
 
-  const cards = [
+  type StatusColor = "green" | "yellow" | "red" | "gray" | "blue";
+
+  const cards: Array<{
+    id: string;
+    title: string;
+    icon: string;
+    status: string;
+    statusColor: StatusColor;
+    metric: string;
+    href: string;
+    gradient: string;
+  }> = [
     {
       id: "website",
       title: "Website",

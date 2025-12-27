@@ -55,9 +55,15 @@ export function StepBusinessType({ data, onUpdate, onNext }: Props) {
   return (
     <div className="space-y-8">
       <div className="text-center">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-500/10 to-purple-500/10 px-4 py-1.5 text-sm font-medium text-purple-600 dark:text-purple-400">
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          </svg>
+          AI-Powered Website Builder
+        </div>
         <h1 className="text-3xl font-bold">What type of website are you building?</h1>
         <p className="mt-2 text-muted-foreground">
-          This helps us choose the best template and content for you
+          Our AI will generate content, suggest designs, and help you launch faster
         </p>
       </div>
 

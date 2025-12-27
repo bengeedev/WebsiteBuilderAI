@@ -8,6 +8,7 @@ import {
   type ColorPreset,
   type FontPairing,
 } from "@repo/templates";
+import { AIBrandingRecommendation } from "./ai-branding-recommendation";
 
 type Props = {
   data: OnboardingData;
@@ -69,6 +70,20 @@ export function StepBranding({ data, onUpdate, onBack, onNext }: Props) {
           Choose colors and typography that represent your business
         </p>
       </div>
+
+      {/* AI Branding Recommendations */}
+      <AIBrandingRecommendation
+        businessType={data.businessType}
+        businessName={data.businessName}
+        onApplyPreset={(preset) => {
+          onUpdate({
+            primaryColor: preset.primaryColor,
+            secondaryColor: preset.secondaryColor,
+            headingFont: preset.headingFont,
+            bodyFont: preset.bodyFont,
+          });
+        }}
+      />
 
       {/* Color Selection */}
       <div className="space-y-4">

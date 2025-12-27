@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/projects";
@@ -41,14 +41,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full max-w-md space-y-8 px-4">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold">Welcome back</h1>
-        <p className="mt-2 text-muted-foreground">
-          Sign in to your account to continue
-        </p>
-      </div>
-
+    <>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
@@ -122,6 +115,39 @@ export default function LoginPage() {
           Continue with GitHub
         </button>
       </div>
+    </>
+  );
+}
+
+function LoginFormFallback() {
+  return (
+    <div className="space-y-4 animate-pulse">
+      <div className="space-y-2">
+        <div className="h-4 w-16 bg-muted rounded" />
+        <div className="h-10 bg-muted rounded" />
+      </div>
+      <div className="space-y-2">
+        <div className="h-4 w-20 bg-muted rounded" />
+        <div className="h-10 bg-muted rounded" />
+      </div>
+      <div className="h-10 bg-muted rounded" />
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <div className="w-full max-w-md space-y-8 px-4">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold">Welcome back</h1>
+        <p className="mt-2 text-muted-foreground">
+          Sign in to your account to continue
+        </p>
+      </div>
+
+      <Suspense fallback={<LoginFormFallback />}>
+        <LoginForm />
+      </Suspense>
 
       <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}

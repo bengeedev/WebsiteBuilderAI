@@ -1,11 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { StepBusinessType } from "@/components/onboarding/step-business-type";
-import { StepBusinessInfo } from "@/components/onboarding/step-business-info";
-import { StepBranding } from "@/components/onboarding/step-branding";
-import { StepPreview } from "@/components/onboarding/step-preview";
+import { ConversationalWizard } from "@/components/onboarding/conversational-wizard";
 
 export type OnboardingData = {
   businessType: string;
@@ -32,96 +27,18 @@ const initialData: OnboardingData = {
 };
 
 export default function NewProjectPage() {
-  const router = useRouter();
-  const [step, setStep] = useState(1);
-  const [data, setData] = useState<OnboardingData>(initialData);
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  const updateData = (updates: Partial<OnboardingData>) => {
-    setData((prev) => ({ ...prev, ...updates }));
+  const handleComplete = (data: OnboardingData) => {
+    console.log("Wizard completed with data:", data);
   };
-
-  const handleGenerate = async () => {
-    setIsGenerating(true);
-    try {
-      // Create project and generate site
-      const res = await fetch("/api/projects", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) throw new Error("Failed to create project");
-
-      const project = await res.json();
-
-      // Generate site content
-      const generateRes = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId: project.id }),
-      });
-
-      if (!generateRes.ok) throw new Error("Failed to generate site");
-
-      router.push(`/projects/${project.id}`);
-    } catch (error) {
-      console.error("Generation error:", error);
-      setIsGenerating(false);
-    }
-  };
-
-  const totalSteps = 4;
-  const progress = (step / totalSteps) * 100;
 
   return (
-    <div className="container max-w-3xl py-12">
-      {/* Progress Bar */}
-      <div className="mb-8">
-        <div className="flex justify-between text-sm text-muted-foreground mb-2">
-          <span>Step {step} of {totalSteps}</span>
-          <span>{Math.round(progress)}% complete</span>
-        </div>
-        <div className="h-2 bg-muted rounded-full overflow-hidden">
-          <div
-            className="h-full bg-primary transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-stone-100 to-stone-50 dark:from-slate-950 dark:to-slate-900 py-6">
+      <div className="container">
+        <ConversationalWizard
+          initialData={initialData}
+          onComplete={handleComplete}
+        />
       </div>
-
-      {/* Steps */}
-      {step === 1 && (
-        <StepBusinessType
-          data={data}
-          onUpdate={updateData}
-          onNext={() => setStep(2)}
-        />
-      )}
-      {step === 2 && (
-        <StepBusinessInfo
-          data={data}
-          onUpdate={updateData}
-          onBack={() => setStep(1)}
-          onNext={() => setStep(3)}
-        />
-      )}
-      {step === 3 && (
-        <StepBranding
-          data={data}
-          onUpdate={updateData}
-          onBack={() => setStep(2)}
-          onNext={() => setStep(4)}
-        />
-      )}
-      {step === 4 && (
-        <StepPreview
-          data={data}
-          onBack={() => setStep(3)}
-          onGenerate={handleGenerate}
-          isGenerating={isGenerating}
-        />
-      )}
     </div>
   );
 }

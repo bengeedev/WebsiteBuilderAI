@@ -6,9 +6,14 @@ import {
   getAIRouter,
   ActionExecutor,
   siteTools,
+  buildSystemPrompt,
+  getAvailableCapabilities,
+  matchCapabilities,
   type SiteState,
   type Message,
   type ToolCall,
+  type UserContext,
+  type PlanTier,
 } from "@repo/ai";
 
 const router = getAIRouter();
@@ -70,35 +75,41 @@ export async function POST(req: Request) {
       },
     };
 
-    // Build system prompt for AI with tool usage instructions
-    const systemPrompt = `You are an AI webmaster for "${project.businessName || project.name}".
-You have FULL CONTROL over this website and can make changes directly using tools.
+    // Build user context for capability filtering
+    // TODO: Get actual user plan from database
+    const userContext: UserContext = {
+      plan: "pro" as PlanTier, // Default to pro for now
+      connectedIntegrations: [],
+      availableAssets: [],
+      enabledFeatureFlags: [],
+    };
 
-Current website state:
-- Business: ${project.businessName} (${project.businessType})
-- Description: ${project.description || "Not set"}
-- Primary Color: ${project.primaryColor}
-- Secondary Color: ${project.secondaryColor}
-- Site Status: ${site?.status || "No site created"}
-- Current Sections: ${JSON.stringify(siteState.sections.map((s) => ({ id: s.id, type: s.type, title: s.title })))}
+    // Get available capabilities and match the user's command to suggest tools
+    const availableCapabilities = getAvailableCapabilities(userContext);
+    const capabilityMatches = matchCapabilities(command, availableCapabilities);
 
-YOUR CAPABILITIES (use these tools to make changes):
-- add_section: Add new sections (hero, about, features, services, testimonials, team, pricing, contact, cta, gallery, faq, blog, newsletter)
-- remove_section: Remove sections by ID or type
-- edit_section: Update section content (title, subtitle, text, items)
-- reorder_sections: Change section order
-- update_colors: Change color scheme (primary_color, secondary_color, accent_color)
-- update_fonts: Change typography (heading_font, body_font)
-- update_seo: Update page title and meta description
-- get_site_info: Get current site information
+    // Build dynamic system prompt using the capabilities registry
+    const systemPrompt = buildSystemPrompt({
+      userContext,
+      siteState,
+      businessInfo: {
+        name: project.businessName || project.name,
+        type: project.businessType || "business",
+        description: project.description || undefined,
+      },
+      additionalContext: `
+## Current Command Analysis
+The user said: "${command}"
+${capabilityMatches.length > 0 ? `Most likely capabilities needed: ${capabilityMatches.slice(0, 3).map(m => m.capability.name).join(", ")}` : ""}
 
-IMPORTANT BEHAVIOR:
+## Behavior Guidelines
 1. When the user asks for changes, USE THE TOOLS directly - don't just describe what you would do
 2. Be proactive - if user says "make it better", suggest and implement specific improvements
 3. After making changes, briefly confirm what was done
 4. You are the webmaster - act decisively and make the website great
-
-Keep responses concise. Focus on actions over explanations.`;
+5. Keep responses concise. Focus on actions over explanations.
+`,
+    });
 
     // Convert history to message format
     const messages: Message[] = history
@@ -197,6 +208,11 @@ Keep responses concise. Focus on actions over explanations.`;
       actions: executedActions,
       siteUpdated: executedActions.length > 0,
       newState: executedActions.length > 0 ? executor.getState() : null,
+      matchedCapabilities: capabilityMatches.slice(0, 3).map((m) => ({
+        id: m.capability.id,
+        name: m.capability.name,
+        confidence: m.confidence,
+      })),
     });
   } catch (error) {
     console.error("AI command error:", error);

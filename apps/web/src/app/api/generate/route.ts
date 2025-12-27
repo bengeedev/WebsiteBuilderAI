@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
-import { prisma } from "@repo/database";
+import { prisma, Prisma } from "@repo/database";
 import { generateSiteContent } from "@repo/ai";
 import { authOptions } from "@/lib/auth";
 
@@ -54,11 +54,11 @@ export async function POST(req: Request) {
       data: {
         projectId: project.id,
         templateId: template?.id || null,
-        content: content as unknown as Record<string, unknown>,
+        content: content as unknown as Prisma.InputJsonValue,
         styles: {
           primaryColor: project.primaryColor,
           secondaryColor: project.secondaryColor,
-        },
+        } as Prisma.InputJsonValue,
         title: content.meta.title,
         description: content.meta.description,
         status: "DRAFT",
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
         siteId: site.id,
         name: "Home",
         slug: "",
-        content: { sections: content.sections },
+        content: { sections: content.sections } as Prisma.InputJsonValue,
         metaTitle: content.meta.title,
         metaDescription: content.meta.description,
         order: 0,
@@ -87,8 +87,8 @@ export async function POST(req: Request) {
           businessName: project.businessName,
           description: project.description,
         }),
-        parameters: {},
-        result: content as unknown as Record<string, unknown>,
+        parameters: {} as Prisma.InputJsonValue,
+        result: content as unknown as Prisma.InputJsonValue,
         model: "claude-sonnet-4-20250514",
         durationMs,
         status: "COMPLETED",
