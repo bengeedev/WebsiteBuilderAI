@@ -105,6 +105,7 @@ pnpm db:push
 | Document | Description |
 |----------|-------------|
 | [Architecture](./architecture.md) | Monorepo structure, packages, and system design |
+| [Block System](./block-system.md) | Composable block system for page building |
 | [Features](./features.md) | Complete feature list (implemented and planned) |
 | [API Reference](./api-reference.md) | REST API endpoints documentation |
 | [Database Schema](./database-schema.md) | Prisma schema and data models |

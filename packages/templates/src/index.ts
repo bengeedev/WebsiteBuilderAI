@@ -103,3 +103,6 @@ export {
 
 // Block system (new composable architecture)
 export * from "./blocks";
+
+// Design token system
+export * from "./tokens";
