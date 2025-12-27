@@ -6,6 +6,9 @@ import { cn } from "@repo/ui";
 import { HeroCentered } from "./centered";
 import { HeroSplit } from "./split";
 import { HeroVideoBg } from "./video-bg";
+import { HeroImageBg } from "./image-bg";
+import { HeroGradient } from "./gradient";
+import { HeroMinimal } from "./minimal";
 
 export type HeroContent = {
   badge?: string;
@@ -40,6 +43,10 @@ const variantComponents: Record<string, React.ComponentType<HeroVariantProps>> =
   centered: HeroCentered,
   split: HeroSplit,
   "video-bg": HeroVideoBg,
+  "image-bg": HeroImageBg,
+  gradient: HeroGradient,
+  minimal: HeroMinimal,
+  "with-form": HeroSplit, // Use split as fallback until form variant is implemented
 };
 
 export type HeroVariantProps = {

@@ -74,6 +74,85 @@ export const heroBlock: BlockType = {
       supportedContent: ["title", "subtitle", "description", "primaryCta", "secondaryCta", "video"],
       className: "text-center text-white relative",
     },
+    {
+      id: "image-bg",
+      name: "Image Background",
+      description: "Full-width hero with image background and text overlay. Great for visual storytelling.",
+      layout: {
+        container: "full",
+        padding: { base: "py-24 px-4", md: "py-32 px-8", lg: "py-40" },
+        flex: {
+          direction: { base: "column" },
+          align: "center",
+          justify: "center",
+          gap: { base: "1.5rem", md: "2rem" },
+        },
+        minHeight: { base: "100vh" },
+        background: {
+          type: "image",
+          value: "",
+          overlay: "rgba(0, 0, 0, 0.4)",
+        },
+      },
+      supportedContent: ["title", "subtitle", "description", "primaryCta", "secondaryCta", "backgroundImage"],
+      className: "text-center text-white relative",
+    },
+    {
+      id: "gradient",
+      name: "Gradient",
+      description: "Modern gradient background hero. Trendy and eye-catching.",
+      layout: {
+        container: "full",
+        padding: { base: "py-20 px-4", md: "py-28 px-8", lg: "py-36" },
+        flex: {
+          direction: { base: "column" },
+          align: "center",
+          justify: "center",
+          gap: { base: "1.5rem", md: "2rem" },
+        },
+        minHeight: { base: "90vh" },
+        background: {
+          type: "gradient",
+          value: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)",
+        },
+      },
+      supportedContent: ["title", "subtitle", "description", "primaryCta", "secondaryCta", "badge"],
+      className: "text-center text-white",
+    },
+    {
+      id: "minimal",
+      name: "Minimal",
+      description: "Clean, minimal hero with just the essentials. Perfect for elegant, simple sites.",
+      layout: {
+        container: "narrow",
+        padding: { base: "py-16 px-4", md: "py-24 px-8", lg: "py-32" },
+        flex: {
+          direction: { base: "column" },
+          align: "center",
+          justify: "center",
+          gap: { base: "1rem", md: "1.5rem" },
+        },
+        minHeight: { base: "auto", md: "60vh" },
+      },
+      supportedContent: ["title", "description", "primaryCta"],
+      className: "text-center",
+    },
+    {
+      id: "with-form",
+      name: "With Form",
+      description: "Hero with embedded signup form. Perfect for lead generation.",
+      layout: {
+        container: "boxed",
+        padding: { base: "py-12 px-4", md: "py-16 px-8", lg: "py-24" },
+        grid: {
+          columns: { base: 1, lg: 2 },
+          gap: { base: "2rem", lg: "4rem" },
+        },
+        minHeight: { base: "auto", md: "80vh" },
+      },
+      supportedContent: ["title", "subtitle", "description", "form", "badge"],
+      className: "items-center",
+    },
   ],
 
   schema: {

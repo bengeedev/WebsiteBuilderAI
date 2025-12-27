@@ -86,6 +86,53 @@ export const testimonialsBlock: BlockType = {
       supportedContent: ["title", "subtitle", "testimonials"],
       className: "",
     },
+    {
+      id: "masonry",
+      name: "Masonry",
+      description: "Varied-height cards in masonry layout. Dynamic and modern.",
+      layout: {
+        container: "boxed",
+        padding: { base: "py-12 px-4", md: "py-16 px-8", lg: "py-20" },
+        grid: {
+          columns: { base: 1, md: 2, lg: 3 },
+          gap: { base: "1.5rem" },
+        },
+      },
+      supportedContent: ["title", "subtitle", "testimonials"],
+      className: "",
+    },
+    {
+      id: "logo-bar",
+      name: "Logo Bar",
+      description: "Simple testimonials with company logos. Subtle trust building.",
+      layout: {
+        container: "boxed",
+        padding: { base: "py-10 px-4", md: "py-14 px-8" },
+        flex: {
+          direction: { base: "column" },
+          align: "center",
+          justify: "center",
+          gap: { base: "2rem" },
+        },
+      },
+      supportedContent: ["title", "logos", "testimonials"],
+      className: "text-center",
+    },
+    {
+      id: "twitter-style",
+      name: "Twitter Style",
+      description: "Social media-inspired testimonial cards. Familiar and authentic.",
+      layout: {
+        container: "boxed",
+        padding: { base: "py-12 px-4", md: "py-16 px-8", lg: "py-20" },
+        grid: {
+          columns: { base: 1, md: 2, lg: 3 },
+          gap: { base: "1rem" },
+        },
+      },
+      supportedContent: ["title", "subtitle", "testimonials"],
+      className: "",
+    },
   ],
 
   schema: {

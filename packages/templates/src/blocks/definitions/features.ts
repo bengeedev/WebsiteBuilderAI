@@ -83,6 +83,68 @@ export const featuresBlock: BlockType = {
       supportedContent: ["title", "subtitle", "description", "features"],
       className: "",
     },
+    {
+      id: "centered-icons",
+      name: "Centered Icons",
+      description: "Large centered icons with text below. Great for visual features.",
+      layout: {
+        container: "boxed",
+        padding: { base: "py-12 px-4", md: "py-16 px-8", lg: "py-20" },
+        grid: {
+          columns: { base: 1, sm: 2, lg: 4 },
+          gap: { base: "2rem" },
+        },
+      },
+      supportedContent: ["title", "subtitle", "features"],
+      className: "text-center",
+    },
+    {
+      id: "bento",
+      name: "Bento Grid",
+      description: "Asymmetric bento-box layout. Modern and unique.",
+      layout: {
+        container: "boxed",
+        padding: { base: "py-12 px-4", md: "py-16 px-8", lg: "py-20" },
+        grid: {
+          columns: { base: 1, md: 2, lg: 4 },
+          gap: { base: "1rem" },
+        },
+      },
+      supportedContent: ["title", "subtitle", "features"],
+      className: "",
+    },
+    {
+      id: "numbered",
+      name: "Numbered Steps",
+      description: "Features as numbered steps. Great for processes or how-it-works.",
+      layout: {
+        container: "boxed",
+        padding: { base: "py-12 px-4", md: "py-16 px-8", lg: "py-20" },
+        flex: {
+          direction: { base: "column" },
+          align: "stretch",
+          justify: "start",
+          gap: { base: "2rem" },
+        },
+      },
+      supportedContent: ["title", "subtitle", "description", "features"],
+      className: "",
+    },
+    {
+      id: "with-image",
+      name: "With Side Image",
+      description: "Features list with large side image. Visual storytelling.",
+      layout: {
+        container: "boxed",
+        padding: { base: "py-12 px-4", md: "py-16 px-8", lg: "py-20" },
+        grid: {
+          columns: { base: 1, lg: 2 },
+          gap: { base: "2rem", lg: "4rem" },
+        },
+      },
+      supportedContent: ["title", "subtitle", "description", "features", "image"],
+      className: "items-center",
+    },
   ],
 
   schema: {

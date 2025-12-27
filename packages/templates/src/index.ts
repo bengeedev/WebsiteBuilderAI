@@ -106,3 +106,92 @@ export * from "./blocks";
 
 // Design token system
 export * from "./tokens";
+
+// Design system (fonts, colors, images, icons)
+export {
+  // Font types
+  type DesignFontCategory,
+  type FontWeight,
+  type DesignFontStyle,
+  type FontDefinition,
+  type DesignFontPairing,
+  // Font data
+  sansSerifFonts,
+  serifFonts,
+  displayFonts,
+  allFonts,
+  fontRegistry,
+  designFontPairings,
+  // Font functions
+  getFont,
+  getFontsByCategory,
+  getFontsByStyle,
+  getRecommendedFonts,
+  getFontPairings,
+  getDesignFontPairing,
+  getRecommendedPairings,
+  generateGoogleFontsUrl,
+  // Color types
+  type DesignColorScheme,
+  type ColorMood,
+  type DesignColorPreset,
+  type ColorHarmony,
+  // Color data
+  designColorPresets,
+  // Color functions
+  getDesignColorPreset,
+  getPresetsByMood,
+  getRecommendedPresets,
+  designHexToRgb,
+  designRgbToHex,
+  hexToHsl,
+  hslToHex,
+  adjustLightness,
+  generateSchemeFromPrimary,
+  generateCssVariables,
+  generateDesignInlineStyles,
+  generateHarmony,
+  // Image types
+  type ImageCategory,
+  type ImageStyle,
+  type AspectRatio,
+  type PlaceholderConfig,
+  type StockPhotoCategory,
+  type ImagePromptTemplate,
+  type ImageDimensions,
+  type PlaceholderPreset,
+  // Image data
+  stockPhotoCategories,
+  imagePromptTemplates,
+  recommendedSizes,
+  placeholderPresets,
+  // Image functions
+  getPlaceholderUrl,
+  generateImagePrompt,
+  getTemplatesByCategory as getImageTemplatesByCategory,
+  getDimensionsFromRatio,
+  getRecommendedSize,
+  getUnsplashUrl,
+  getUnsplashCollectionUrl,
+  getPlaceholderPreset,
+  getPlaceholderFromPreset,
+  // Icon types
+  type IconLibrary,
+  type IconCategory,
+  type IconStyle,
+  type IconDefinition,
+  type IconSet,
+  // Icon data
+  icons,
+  iconRegistry,
+  iconSets,
+  // Icon functions
+  getIcon,
+  getIconsByCategory,
+  searchIcons,
+  getIconsForConcept,
+  getIconEmoji,
+  getIconCategories,
+  getIconSet,
+  getIconsFromSet,
+} from "./design";
