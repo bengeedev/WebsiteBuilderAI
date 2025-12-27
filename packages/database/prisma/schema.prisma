@@ -21,9 +21,11 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts Account[]
-  sessions Session[]
-  projects Project[]
+  accounts     Account[]
+  sessions     Session[]
+  projects     Project[]
+  memory       UserMemory?
+  chatSessions ChatSession[]
 }
 
 model Account {
@@ -87,9 +89,11 @@ model Project {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sites  Site[]
-  assets Asset[]
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sites        Site[]
+  assets       Asset[]
+  memory       ProjectMemory?
+  chatSessions ChatSession[]
 
   @@index([userId])
 }
@@ -243,4 +247,122 @@ enum GenerationStatus {
   PROCESSING
   COMPLETED
   FAILED
+}
+
+// ============================================
+// AI MEMORY MODELS
+// ============================================
+
+// User Memory - Global preferences (persists forever)
+model UserMemory {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  // Style preferences: colors, fonts, design style, layout prefs
+  stylePreferences Json @default("{}")
+
+  // Business context: industries, brand voice, target audience
+  businessContext Json @default("{}")
+
+  // Interaction patterns: concise/verbose, proactive/reactive, skill level
+  interactionPatterns Json @default("{}")
+
+  // Learning from decisions: [{context, decision, timestamp}]
+  decisionHistory Json @default("[]")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Project Memory - Per-project context
+model ProjectMemory {
+  id        String @id @default(cuid())
+  projectId String @unique
+
+  // Extended business details: goals, audience, competitors, USPs
+  businessDetails Json @default("{}")
+
+  // Design decisions with rationale
+  designDecisions Json @default("[]")
+
+  // Content version history for undo
+  contentHistory Json @default("[]")
+
+  // AI-generated content cache
+  generatedContentCache Json @default("{}")
+
+  // Site goals/objectives
+  siteGoals Json @default("[]")
+
+  // Discovered info from scraping (social, domain, email, colors)
+  discoveredInfo Json @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// Chat Session - Persists across browser sessions
+model ChatSession {
+  id        String @id @default(cuid())
+  projectId String
+  userId    String
+
+  status SessionStatus @default(ACTIVE)
+
+  // Todo list: [{id, task, status, priority}]
+  currentTasks Json @default("[]")
+
+  // Pending questions: [{id, question, field, required}]
+  pendingQuestions Json @default("[]")
+
+  // Work in progress state
+  wipState Json @default("{}")
+
+  lastActivityAt DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  project  Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@index([projectId])
+  @@index([userId])
+  @@index([status])
+}
+
+enum SessionStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  EXPIRED
+}
+
+// Chat Messages - Conversation history
+model ChatMessage {
+  id        String @id @default(cuid())
+  sessionId String
+
+  role    MessageRole
+  content String      @db.Text
+
+  toolCalls Json @default("[]")
+  actions   Json @default("[]")
+  tokens    Int?
+
+  createdAt DateTime @default(now())
+
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
 }

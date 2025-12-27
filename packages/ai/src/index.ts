@@ -93,3 +93,31 @@ export {
   buildSEOAnalysisPrompt,
   buildContentImprovementPrompt,
 } from "./capabilities";
+
+// Memory Services
+export {
+  UserMemoryService,
+  ProjectMemoryService,
+  SessionMemoryService,
+  MemoryContextBuilder,
+  // Types
+  type StylePreferences,
+  type BusinessContext,
+  type InteractionPatterns,
+  type DecisionRecord,
+  type UserMemoryData,
+  type BusinessDetails,
+  type DesignDecision,
+  type ContentVersion,
+  type SiteGoal,
+  type DiscoveredInfo,
+  type ProjectMemoryData,
+  type SessionTaskStatus,
+  type SessionTask,
+  type PendingQuestion,
+  type WIPState,
+  type SessionMemoryData,
+  type AIMemoryContext,
+  type MessageRole,
+  type ChatMessageData,
+} from "./memory";
