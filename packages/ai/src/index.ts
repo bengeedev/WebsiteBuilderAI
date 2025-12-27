@@ -1,5 +1,5 @@
 // Site generation
-export { generateSiteContent } from "./generate";
+export { generateSiteContent, generateSiteBlocks, type GeneratedSite } from "./generate";
 
 // Types
 export type {

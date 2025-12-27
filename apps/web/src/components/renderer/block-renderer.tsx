@@ -13,6 +13,14 @@ import { CTABlock } from "../blocks/cta";
 import { ContactBlock } from "../blocks/contact";
 import { FooterBlock } from "../blocks/footer";
 import { TextWithImageBlock } from "../blocks/text-with-image";
+import { HeaderBlock } from "../blocks/header";
+import { MenuBlock } from "../blocks/menu";
+import { GalleryBlock } from "../blocks/gallery";
+import { PricingBlock } from "../blocks/pricing";
+import { TeamBlock } from "../blocks/team";
+import { FAQBlock } from "../blocks/faq";
+import { StatsBlock } from "../blocks/stats";
+import { NewsletterBlock } from "../blocks/newsletter";
 
 // Block component registry
 const blockComponents: Record<string, React.ComponentType<BlockComponentProps>> = {
@@ -23,6 +31,14 @@ const blockComponents: Record<string, React.ComponentType<BlockComponentProps>> 
   contact: ContactBlock,
   footer: FooterBlock,
   "text-with-image": TextWithImageBlock,
+  header: HeaderBlock,
+  menu: MenuBlock,
+  gallery: GalleryBlock,
+  pricing: PricingBlock,
+  team: TeamBlock,
+  faq: FAQBlock,
+  stats: StatsBlock,
+  newsletter: NewsletterBlock,
 };
 
 export type BlockComponentProps = {

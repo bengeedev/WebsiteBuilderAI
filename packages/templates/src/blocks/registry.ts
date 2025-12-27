@@ -17,7 +17,7 @@ import type {
   ValidationError,
 } from "./types";
 
-// Import block definitions (will be added as we implement each block)
+// Import block definitions
 import { heroBlock } from "./definitions/hero";
 import { textWithImageBlock } from "./definitions/text-with-image";
 import { featuresBlock } from "./definitions/features";
@@ -25,6 +25,14 @@ import { testimonialsBlock } from "./definitions/testimonials";
 import { ctaBlock } from "./definitions/cta";
 import { contactBlock } from "./definitions/contact";
 import { footerBlock } from "./definitions/footer";
+import { headerBlock } from "./definitions/header";
+import { menuBlock } from "./definitions/menu";
+import { galleryBlock } from "./definitions/gallery";
+import { pricingBlock } from "./definitions/pricing";
+import { teamBlock } from "./definitions/team";
+import { faqBlock } from "./definitions/faq";
+import { statsBlock } from "./definitions/stats";
+import { newsletterBlock } from "./definitions/newsletter";
 
 // ============================================
 // REGISTRY
@@ -35,13 +43,23 @@ export const blockRegistry = new Map<string, BlockType>();
 
 // Register all blocks
 const allBlocks: BlockType[] = [
+  // Structural
+  headerBlock,
+  footerBlock,
+  // Content
   heroBlock,
   textWithImageBlock,
   featuresBlock,
   testimonialsBlock,
   ctaBlock,
   contactBlock,
-  footerBlock,
+  menuBlock,
+  galleryBlock,
+  pricingBlock,
+  teamBlock,
+  faqBlock,
+  statsBlock,
+  newsletterBlock,
 ];
 
 for (const block of allBlocks) {
@@ -365,16 +383,43 @@ export function matchBlocksToIntent(
  */
 export function getRecommendedBlocks(businessType: string): BlockType[] {
   const recommendations: Record<string, string[]> = {
-    restaurant: ["hero", "text-with-image", "features", "testimonials", "contact", "footer"],
-    portfolio: ["hero", "features", "testimonials", "contact", "footer"],
-    business: ["hero", "features", "text-with-image", "testimonials", "cta", "contact", "footer"],
-    ecommerce: ["hero", "features", "testimonials", "cta", "contact", "footer"],
-    blog: ["hero", "text-with-image", "contact", "footer"],
-    default: ["hero", "features", "testimonials", "contact", "footer"],
+    restaurant: ["header", "hero", "text-with-image", "menu", "gallery", "testimonials", "contact", "footer"],
+    cafe: ["header", "hero", "menu", "gallery", "testimonials", "contact", "footer"],
+    portfolio: ["header", "hero", "gallery", "text-with-image", "testimonials", "contact", "footer"],
+    photography: ["header", "hero", "gallery", "testimonials", "pricing", "contact", "footer"],
+    agency: ["header", "hero", "features", "team", "testimonials", "cta", "contact", "footer"],
+    business: ["header", "hero", "features", "text-with-image", "testimonials", "cta", "contact", "footer"],
+    consulting: ["header", "hero", "features", "team", "testimonials", "pricing", "faq", "contact", "footer"],
+    saas: ["header", "hero", "features", "pricing", "testimonials", "faq", "cta", "footer"],
+    ecommerce: ["header", "hero", "features", "testimonials", "faq", "newsletter", "footer"],
+    blog: ["header", "hero", "text-with-image", "newsletter", "contact", "footer"],
+    fitness: ["header", "hero", "features", "team", "pricing", "testimonials", "contact", "footer"],
+    healthcare: ["header", "hero", "features", "team", "testimonials", "faq", "contact", "footer"],
+    realestate: ["header", "hero", "gallery", "features", "testimonials", "contact", "footer"],
+    default: ["header", "hero", "features", "testimonials", "cta", "contact", "footer"],
   };
 
-  const blockIds = recommendations[businessType] || recommendations.default;
+  const blockIds = recommendations[businessType.toLowerCase()] || recommendations.default;
   return blockIds
     .map((id) => blockRegistry.get(id))
     .filter((b): b is BlockType => b !== undefined);
 }
+
+// Export all block definitions for direct use
+export {
+  heroBlock,
+  textWithImageBlock,
+  featuresBlock,
+  testimonialsBlock,
+  ctaBlock,
+  contactBlock,
+  footerBlock,
+  headerBlock,
+  menuBlock,
+  galleryBlock,
+  pricingBlock,
+  teamBlock,
+  faqBlock,
+  statsBlock,
+  newsletterBlock,
+};

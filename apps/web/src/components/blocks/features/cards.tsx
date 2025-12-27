@@ -18,35 +18,35 @@ export function FeaturesCards({ content, className }: FeaturesVariantProps) {
 
       <div
         className={cn(
-          "grid gap-6",
-          columns === 2 && "md:grid-cols-2",
-          columns === 3 && "md:grid-cols-2 lg:grid-cols-3"
+          "grid gap-4 sm:gap-6",
+          columns === 2 && "sm:grid-cols-2",
+          columns === 3 && "sm:grid-cols-2 lg:grid-cols-3"
         )}
       >
         {content.features.map((feature, index) => (
           <div
             key={index}
             className={cn(
-              "group p-6 rounded-xl",
-              "bg-[var(--color-surface)] border border-[var(--color-border)]",
+              "group p-4 sm:p-6 rounded-lg sm:rounded-xl",
+              "bg-[var(--color-surface,#f8fafc)] border border-[var(--color-border,#e2e8f0)]",
               "shadow-sm hover:shadow-md transition-shadow duration-200"
             )}
           >
             {feature.icon && (
-              <div className="mb-4">
+              <div className="mb-3 sm:mb-4">
                 <FeatureIcon icon={feature.icon} />
               </div>
             )}
-            <h3 className="text-xl font-semibold text-[var(--color-text-primary)] mb-2 font-[var(--font-heading)]">
+            <h3 className="text-lg sm:text-xl font-semibold text-[var(--color-text-primary,#0f172a)] mb-2">
               {feature.title}
             </h3>
-            <p className="text-[var(--color-text-secondary)]">
+            <p className="text-sm sm:text-base text-[var(--color-text-secondary,#475569)]">
               {feature.description}
             </p>
             {feature.link && (
               <a
                 href={feature.link.url}
-                className="inline-flex items-center mt-4 text-sm font-medium text-[var(--color-primary)] hover:underline"
+                className="inline-flex items-center mt-3 sm:mt-4 text-sm font-medium text-[var(--color-primary,#2563eb)] hover:underline"
               >
                 {feature.link.text}
                 <svg

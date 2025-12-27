@@ -61,21 +61,21 @@ export function SectionHeader({
   if (!title && !subtitle && !description) return null;
 
   return (
-    <div className={cn("mb-12", centered && "text-center", className)}>
+    <div className={cn("mb-8 sm:mb-10 md:mb-12", centered && "text-center", className)}>
       {subtitle && (
-        <span className="inline-block text-sm font-semibold text-[var(--color-primary)] uppercase tracking-wider mb-2">
+        <span className="inline-block text-xs sm:text-sm font-semibold text-[var(--color-primary,#2563eb)] uppercase tracking-wider mb-2">
           {subtitle}
         </span>
       )}
       {title && (
-        <h2 className="text-3xl md:text-4xl font-bold text-[var(--color-text-primary)] font-[var(--font-heading)]">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-primary,#0f172a)]">
           {title}
         </h2>
       )}
       {description && (
         <p
           className={cn(
-            "mt-4 text-lg text-[var(--color-text-secondary)]",
+            "mt-3 sm:mt-4 text-base sm:text-lg text-[var(--color-text-secondary,#475569)]",
             centered && "max-w-2xl mx-auto"
           )}
         >
@@ -123,9 +123,9 @@ export function FeatureIcon({
   return (
     <div
       className={cn(
-        "flex items-center justify-center w-12 h-12 rounded-lg",
-        "bg-[var(--color-primary)]/10 text-[var(--color-primary)]",
-        "text-xl",
+        "flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-lg",
+        "bg-[var(--color-primary,#2563eb)]/10 text-[var(--color-primary,#2563eb)]",
+        "text-lg sm:text-xl",
         className
       )}
     >

@@ -26,10 +26,11 @@ export async function POST(req: Request) {
         const { businessType } = data;
         const defaults = BUSINESS_TYPE_DEFAULTS[businessType] || {};
         const fonts = FONT_RECOMMENDATIONS[businessType] || { heading: "Inter", body: "Inter" };
+        const primaryColor = (defaults.primaryColor as string) || "#2563eb";
 
         return NextResponse.json({
-          primaryColor: defaults.primaryColor || "#2563eb",
-          secondaryColor: deriveSecondaryColor(defaults.primaryColor || "#2563eb"),
+          primaryColor,
+          secondaryColor: deriveSecondaryColor(primaryColor),
           headingFont: fonts.heading,
           bodyFont: fonts.body,
           siteGoals: defaults.siteGoals || [],

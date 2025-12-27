@@ -14,25 +14,25 @@ export function FeaturesIconLeft({ content, className }: FeaturesVariantProps) {
         description={content.description}
       />
 
-      <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
+      <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
         {content.features.map((feature, index) => (
-          <div key={index} className="flex gap-4">
+          <div key={index} className="flex gap-3 sm:gap-4">
             {feature.icon && (
               <div className="flex-shrink-0">
                 <FeatureIcon icon={feature.icon} />
               </div>
             )}
             <div>
-              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-1 font-[var(--font-heading)]">
+              <h3 className="text-base sm:text-lg font-semibold text-[var(--color-text-primary,#0f172a)] mb-1">
                 {feature.title}
               </h3>
-              <p className="text-[var(--color-text-secondary)] text-sm">
+              <p className="text-[var(--color-text-secondary,#475569)] text-sm">
                 {feature.description}
               </p>
               {feature.link && (
                 <a
                   href={feature.link.url}
-                  className="inline-flex items-center mt-2 text-sm font-medium text-[var(--color-primary)] hover:underline"
+                  className="inline-flex items-center mt-2 text-sm font-medium text-[var(--color-primary,#2563eb)] hover:underline"
                 >
                   {feature.link.text}
                   <svg

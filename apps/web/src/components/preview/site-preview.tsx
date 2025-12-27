@@ -1,6 +1,133 @@
 "use client";
 
-type SectionData = {
+import type { BlockInstance, DesignTokens } from "@repo/templates";
+import { defaultTokens } from "@repo/templates";
+import { PageRenderer, type PageData } from "../renderer/page-renderer";
+
+// ============================================
+// NEW BLOCK-BASED PREVIEW (Primary)
+// ============================================
+
+type BlockBasedProps = {
+  blocks: BlockInstance[];
+  tokens?: Partial<DesignTokens>;
+  businessName?: string;
+  isEditing?: boolean;
+  onSelectBlock?: (blockId: string) => void;
+  selectedBlockId?: string;
+};
+
+/**
+ * Block-based site preview using the new composable renderer
+ */
+export function SitePreview({
+  blocks,
+  tokens,
+  businessName,
+  isEditing = false,
+  onSelectBlock,
+  selectedBlockId,
+}: BlockBasedProps) {
+  // Merge provided tokens with defaults
+  const mergedTokens: DesignTokens = {
+    ...defaultTokens,
+    ...tokens,
+    colors: {
+      ...defaultTokens.colors,
+      ...tokens?.colors,
+      text: {
+        ...defaultTokens.colors.text,
+        ...tokens?.colors?.text,
+      },
+    },
+    typography: {
+      ...defaultTokens.typography,
+      ...tokens?.typography,
+      fontFamily: {
+        ...defaultTokens.typography.fontFamily,
+        ...tokens?.typography?.fontFamily,
+      },
+      fontSize: {
+        ...defaultTokens.typography.fontSize,
+        ...tokens?.typography?.fontSize,
+      },
+      fontWeight: {
+        ...defaultTokens.typography.fontWeight,
+        ...tokens?.typography?.fontWeight,
+      },
+      lineHeight: {
+        ...defaultTokens.typography.lineHeight,
+        ...tokens?.typography?.lineHeight,
+      },
+      letterSpacing: {
+        ...defaultTokens.typography.letterSpacing,
+        ...tokens?.typography?.letterSpacing,
+      },
+    },
+    spacing: {
+      ...defaultTokens.spacing,
+      ...tokens?.spacing,
+      section: {
+        ...defaultTokens.spacing.section,
+        ...tokens?.spacing?.section,
+      },
+      container: {
+        ...defaultTokens.spacing.container,
+        ...tokens?.spacing?.container,
+      },
+      gap: {
+        ...defaultTokens.spacing.gap,
+        ...tokens?.spacing?.gap,
+      },
+    },
+    effects: {
+      ...defaultTokens.effects,
+      ...tokens?.effects,
+      borderRadius: {
+        ...defaultTokens.effects.borderRadius,
+        ...tokens?.effects?.borderRadius,
+      },
+      shadow: {
+        ...defaultTokens.effects.shadow,
+        ...tokens?.effects?.shadow,
+      },
+      transition: {
+        ...defaultTokens.effects.transition,
+        ...tokens?.effects?.transition,
+      },
+    },
+    breakpoints: {
+      ...defaultTokens.breakpoints,
+      ...tokens?.breakpoints,
+    },
+  };
+
+  // Create a page object for PageRenderer
+  const page: PageData = {
+    id: "preview",
+    name: "Preview",
+    slug: "",
+    blocks,
+  };
+
+  return (
+    <div className="min-h-full bg-[var(--color-background,#ffffff)]">
+      <PageRenderer
+        page={page}
+        tokens={mergedTokens}
+        isEditing={isEditing}
+        onBlockSelect={onSelectBlock}
+        selectedBlockId={selectedBlockId}
+      />
+    </div>
+  );
+}
+
+// ============================================
+// LEGACY SECTION-BASED PREVIEW (Deprecated)
+// ============================================
+
+type LegacySectionData = {
   type?: string;
   title?: string;
   subtitle?: string;
@@ -20,8 +147,8 @@ type SectionData = {
   };
 };
 
-type Props = {
-  sections: Array<SectionData>;
+type LegacyProps = {
+  sections: Array<LegacySectionData>;
   styles: {
     primaryColor?: string;
     secondaryColor?: string;
@@ -29,7 +156,11 @@ type Props = {
   businessName: string;
 };
 
-export function SitePreview({ sections, styles, businessName }: Props) {
+/**
+ * @deprecated Use SitePreview with blocks prop instead
+ * Legacy section-based preview for backward compatibility
+ */
+export function LegacySitePreview({ sections, styles, businessName }: LegacyProps) {
   const primaryColor = styles.primaryColor || "#2563eb";
   const secondaryColor = styles.secondaryColor || "#1e293b";
 
@@ -64,7 +195,7 @@ export function SitePreview({ sections, styles, businessName }: Props) {
 
       {/* Sections */}
       {sections.map((section, index) => (
-        <Section
+        <LegacySection
           key={index}
           section={section}
           primaryColor={primaryColor}
@@ -88,13 +219,13 @@ export function SitePreview({ sections, styles, businessName }: Props) {
   );
 }
 
-function Section({
+function LegacySection({
   section,
   primaryColor,
   secondaryColor,
   isFirst,
 }: {
-  section: SectionData;
+  section: LegacySectionData;
   primaryColor: string;
   secondaryColor: string;
   isFirst: boolean;
@@ -357,4 +488,200 @@ function Section({
       </div>
     </section>
   );
+}
+
+// ============================================
+// HELPER: Convert legacy sections to blocks
+// ============================================
+
+/**
+ * Convert legacy section format to block instances
+ * Useful for migrating existing sites to the new format
+ */
+export function convertSectionsToBlocks(
+  sections: LegacySectionData[],
+  styles: { primaryColor?: string; secondaryColor?: string },
+  businessName: string
+): BlockInstance[] {
+  const blocks: BlockInstance[] = [];
+  let blockIndex = 0;
+
+  const generateId = () => `block_${Date.now()}_${blockIndex++}`;
+
+  for (const section of sections) {
+    const type = section.type || "default";
+
+    switch (type) {
+      case "hero":
+        blocks.push({
+          id: generateId(),
+          blockType: "hero",
+          variant: "centered",
+          content: {
+            title: section.title || "",
+            subtitle: section.subtitle || "",
+            description: section.content || "",
+            primaryCta: section.cta
+              ? { text: section.cta.text || "Get Started", url: section.cta.url || "#" }
+              : undefined,
+          },
+        });
+        break;
+
+      case "about":
+        blocks.push({
+          id: generateId(),
+          blockType: "text-with-image",
+          variant: "image-right",
+          content: {
+            title: section.title || "",
+            subtitle: section.subtitle || "",
+            content: section.content || "",
+          },
+        });
+        break;
+
+      case "features":
+      case "services":
+        blocks.push({
+          id: generateId(),
+          blockType: "features",
+          variant: "grid",
+          content: {
+            title: section.title || "",
+            subtitle: section.subtitle || "",
+            features: (section.items || []).map((item) => ({
+              title: item.title || "",
+              description: item.description || "",
+              icon: item.icon || "star",
+            })),
+          },
+        });
+        break;
+
+      case "menu":
+        blocks.push({
+          id: generateId(),
+          blockType: "menu",
+          variant: "columns",
+          content: {
+            title: section.title || "",
+            subtitle: section.subtitle || "",
+            categories: [
+              {
+                name: "Menu",
+                items: (section.items || []).map((item) => ({
+                  name: item.title || "",
+                  description: item.description || "",
+                  price: item.price || "",
+                })),
+              },
+            ],
+          },
+        });
+        break;
+
+      case "testimonials":
+        blocks.push({
+          id: generateId(),
+          blockType: "testimonials",
+          variant: "grid",
+          content: {
+            title: section.title || "",
+            testimonials: (section.items || []).map((item) => ({
+              quote: item.quote || item.description || "",
+              author: item.name || item.title || "",
+              role: item.role || "",
+            })),
+          },
+        });
+        break;
+
+      case "team":
+        blocks.push({
+          id: generateId(),
+          blockType: "team",
+          variant: "grid",
+          content: {
+            title: section.title || "",
+            members: (section.items || []).map((item) => ({
+              name: item.name || item.title || "",
+              role: item.role || "",
+              bio: item.description || "",
+            })),
+          },
+        });
+        break;
+
+      case "cta":
+        blocks.push({
+          id: generateId(),
+          blockType: "cta",
+          variant: "banner",
+          content: {
+            title: section.title || "",
+            description: section.content || "",
+            primaryCta: section.cta
+              ? { text: section.cta.text || "Get Started", url: section.cta.url || "#" }
+              : undefined,
+          },
+        });
+        break;
+
+      case "contact":
+        blocks.push({
+          id: generateId(),
+          blockType: "contact",
+          variant: "simple",
+          content: {
+            title: section.title || "",
+            description: section.content || "",
+          },
+        });
+        break;
+
+      default:
+        // Generic content block
+        blocks.push({
+          id: generateId(),
+          blockType: "text-with-image",
+          variant: "image-right",
+          content: {
+            title: section.title || "",
+            content: section.content || "",
+          },
+        });
+    }
+  }
+
+  // Add header at the beginning
+  blocks.unshift({
+    id: generateId(),
+    blockType: "header",
+    variant: "simple",
+    content: {
+      logo: { text: businessName },
+      navigation: sections
+        .filter((s) => s.type && s.type !== "hero")
+        .slice(0, 4)
+        .map((s) => ({
+          text: s.title || s.type || "",
+          url: `#${s.type}`,
+        })),
+      cta: { text: "Contact", url: "#contact" },
+    },
+  });
+
+  // Add footer at the end
+  blocks.push({
+    id: generateId(),
+    blockType: "footer",
+    variant: "simple",
+    content: {
+      logo: { text: businessName },
+      copyright: `© ${new Date().getFullYear()} ${businessName}. All rights reserved.`,
+    },
+  });
+
+  return blocks;
 }

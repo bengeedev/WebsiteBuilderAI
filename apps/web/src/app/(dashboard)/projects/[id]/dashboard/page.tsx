@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { AICommandBar } from "@/components/dashboard/ai-command-bar";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 type Project = {
   id: string;
@@ -16,6 +16,7 @@ type Project = {
 
 export default function ProjectDashboard() {
   const params = useParams();
+  const router = useRouter();
   const [project, setProject] = useState<Project | null>(null);
   const [aiMessages, setAiMessages] = useState<Array<{role: string; content: string}>>([
     { role: "assistant", content: "Hey! I'm your AI webmaster. What would you like me to do today?" }
@@ -76,7 +77,7 @@ export default function ProjectDashboard() {
       status: "Live",
       statusColor: "green",
       metric: "Edit Site",
-      href: `/projects/${params.id}`,
+      href: `/projects/${params.id}/edit`,
       gradient: "from-blue-500 to-cyan-500",
     },
     {
@@ -184,7 +185,10 @@ export default function ProjectDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <button className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition text-sm">
+            <button
+              onClick={() => router.push(`/projects/${params.id}/edit`)}
+              className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition text-sm"
+            >
               Preview Site
             </button>
             <button className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 transition text-sm font-medium">

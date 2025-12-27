@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
 import { prisma, Prisma } from "@repo/database";
-import { generateSiteContent } from "@repo/ai";
+import { generateSiteBlocks } from "@repo/ai";
 import { authOptions } from "@/lib/auth";
 
 const generateSchema = z.object({
@@ -39,13 +39,15 @@ export async function POST(req: Request) {
       },
     });
 
-    // Generate content with AI
+    // Generate content with AI (block-based)
     const startTime = Date.now();
-    const content = await generateSiteContent({
+    const result = await generateSiteBlocks({
       businessType: project.businessType || "business",
       businessName: project.businessName || project.name,
       businessDescription: project.description || "",
       businessTagline: project.businessTagline || undefined,
+      primaryColor: project.primaryColor || undefined,
+      secondaryColor: project.secondaryColor || undefined,
     });
     const durationMs = Date.now() - startTime;
 
@@ -54,26 +56,30 @@ export async function POST(req: Request) {
       data: {
         projectId: project.id,
         templateId: template?.id || null,
-        content: content as unknown as Prisma.InputJsonValue,
+        content: {
+          meta: result.meta,
+          blocks: result.blocks,
+        } as Prisma.InputJsonValue,
         styles: {
           primaryColor: project.primaryColor,
           secondaryColor: project.secondaryColor,
+          ...(result.designTokens || {}),
         } as Prisma.InputJsonValue,
-        title: content.meta.title,
-        description: content.meta.description,
+        title: result.meta.title,
+        description: result.meta.description,
         status: "DRAFT",
       },
     });
 
-    // Create default pages
+    // Create default pages with blocks
     await prisma.page.create({
       data: {
         siteId: site.id,
         name: "Home",
         slug: "",
-        content: { sections: content.sections } as Prisma.InputJsonValue,
-        metaTitle: content.meta.title,
-        metaDescription: content.meta.description,
+        content: { blocks: result.blocks } as Prisma.InputJsonValue,
+        metaTitle: result.meta.title,
+        metaDescription: result.meta.description,
         order: 0,
       },
     });
@@ -88,7 +94,7 @@ export async function POST(req: Request) {
           description: project.description,
         }),
         parameters: {} as Prisma.InputJsonValue,
-        result: content as unknown as Prisma.InputJsonValue,
+        result: result as unknown as Prisma.InputJsonValue,
         model: "claude-sonnet-4-20250514",
         durationMs,
         status: "COMPLETED",
@@ -97,7 +103,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       site,
-      content,
+      content: result,
     });
   } catch (error) {
     console.error("Generate error:", error);
