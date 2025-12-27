@@ -3,16 +3,40 @@
 import { ConversationalWizard } from "@/components/onboarding/conversational-wizard";
 
 export type OnboardingData = {
+  // Existing presence
+  existingWebsite?: string;
+  existingSocials?: {
+    instagram?: string;
+    facebook?: string;
+    linkedin?: string;
+    twitter?: string;
+  };
+  existingDomain?: string;
+  existingEmail?: string;
+  // Business info
   businessType: string;
   businessName: string;
   businessDescription: string;
   businessTagline: string;
+  // Branding
   primaryColor: string;
   secondaryColor: string;
   accentColor?: string;
   headingFont: string;
   bodyFont: string;
   logoUrl?: string;
+  // Scraped data from existing site
+  scrapedData?: {
+    title?: string;
+    description?: string;
+    colors?: string[];
+    logoUrl?: string;
+    contactInfo?: {
+      email?: string;
+      phone?: string;
+      address?: string;
+    };
+  };
 };
 
 const initialData: OnboardingData = {

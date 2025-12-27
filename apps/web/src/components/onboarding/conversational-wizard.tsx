@@ -16,6 +16,15 @@ type Message = {
   revealedOptions?: number;
 };
 
+type BusinessUnderstanding = {
+  businessName: string;
+  summary: string;
+  suggestedType: string;
+  confidence: "high" | "medium" | "low";
+  keyInsights: string[];
+  suggestedTagline?: string;
+};
+
 type Option = {
   id: string;
   label: string;
@@ -39,6 +48,19 @@ const businessTypeOptions: Option[] = [
   { id: "fitness", label: "Fitness & Health", value: "fitness", icon: "💪", description: "Gyms, trainers, wellness" },
 ];
 
+const yesNoOptions: Option[] = [
+  { id: "yes", label: "Yes", value: "yes", icon: "✅" },
+  { id: "no", label: "No", value: "no", icon: "❌" },
+];
+
+// Discovery questions in order
+const discoveryQuestions = [
+  { key: "website", question: "Do you have an existing website you'd like me to analyze and improve?", icon: "🌐" },
+  { key: "social", question: "Do you have social media accounts for your business?", icon: "📱" },
+  { key: "domain", question: "Do you already own a domain name?", icon: "🔗" },
+  { key: "email", question: "Do you have a business email address?", icon: "📧" },
+];
+
 const colorPresetOptions: Option[] = [
   { id: "blue-pro", label: "Professional Blue", value: "#2563eb,#1e293b", icon: "🔵" },
   { id: "purple-creative", label: "Creative Purple", value: "#7c3aed,#1f2937", icon: "🟣" },
@@ -59,8 +81,12 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentInput, setCurrentInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(-1); // -1 = discovery, 0+ = regular flow
+  const [discoveryMode, setDiscoveryMode] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [discoveryQuestionIndex, setDiscoveryQuestionIndex] = useState(0);
   const [hasStarted, setHasStarted] = useState(false);
+  const [aiUnderstanding, setAiUnderstanding] = useState<BusinessUnderstanding | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -115,18 +141,20 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
   useEffect(() => {
     if (!hasStarted) {
       setHasStarted(true);
-      const welcomeContent = "Hey! 👋 I'm your AI website builder. I'll help you create a beautiful website in just a few minutes.\n\nFirst, what type of website are you looking to build?";
+      const firstQuestion = discoveryQuestions[0];
+      const welcomeContent = `Hey! 👋 I'm your AI website builder. Let me learn a bit about you first.\n\n${firstQuestion.icon} ${firstQuestion.question}`;
+      setDiscoveryMode("ask-" + firstQuestion.key);
       setMessages([{
         id: "welcome",
         role: "ai",
         content: welcomeContent,
         displayedContent: "",
-        options: businessTypeOptions,
+        options: yesNoOptions,
         isRevealing: true,
         revealedOptions: 0,
       }]);
       // Start revealing the welcome message
-      setTimeout(() => revealText("welcome", welcomeContent, businessTypeOptions), 300);
+      setTimeout(() => revealText("welcome", welcomeContent, yesNoOptions), 300);
     }
   }, [hasStarted, revealText]);
 
@@ -177,6 +205,245 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
     setData(prev => ({ ...prev, ...updates }));
   };
 
+  // Move to the next discovery question or finish discovery
+  const moveToNextDiscoveryQuestion = useCallback(() => {
+    const nextIndex = discoveryQuestionIndex + 1;
+
+    if (nextIndex >= discoveryQuestions.length) {
+      // All discovery questions done
+      setDiscoveryMode(null);
+
+      if (data.businessType) {
+        // Business type already set from website analysis
+        setStep(1);
+        setTimeout(() => {
+          const nameFromData = aiUnderstanding?.businessName || data.businessName;
+          if (nameFromData) {
+            addAIMessage(
+              `Perfect! Now let's confirm your details. ✨\n\nI've got you as "${nameFromData}".\n\nIs this correct?`,
+              [
+                { id: "keep-name", label: `Keep "${nameFromData}"`, value: "keep", icon: "✅" },
+                { id: "change-name", label: "Use a different name", value: "change", icon: "✏️" },
+              ]
+            );
+          } else {
+            addAIMessage(
+              `Perfect! Now let's build your site. ✨\n\nWhat's the name of your business?`,
+              undefined,
+              { type: "text", placeholder: "e.g., Mario's Italian Kitchen", field: "businessName" }
+            );
+          }
+        }, 300);
+      } else {
+        // Need to ask for business type
+        setStep(0);
+        setTimeout(() => {
+          addAIMessage(
+            "Great! Now I have a better picture. ✨\n\nWhat type of website are you building?",
+            businessTypeOptions
+          );
+        }, 300);
+      }
+    } else {
+      // Ask the next discovery question
+      setDiscoveryQuestionIndex(nextIndex);
+      const nextQuestion = discoveryQuestions[nextIndex];
+      setDiscoveryMode("ask-" + nextQuestion.key);
+      setTimeout(() => {
+        addAIMessage(
+          `${nextQuestion.icon} ${nextQuestion.question}`,
+          yesNoOptions
+        );
+      }, 300);
+    }
+  }, [discoveryQuestionIndex, data.businessType, data.businessName, aiUnderstanding, addAIMessage]);
+
+  // Handle yes/no answer to discovery questions
+  const handleDiscoveryYesNo = useCallback((answer: "yes" | "no") => {
+    const currentQuestion = discoveryQuestions[discoveryQuestionIndex];
+
+    if (answer === "no") {
+      addUserMessage("No");
+      moveToNextDiscoveryQuestion();
+    } else {
+      addUserMessage("Yes");
+      // Switch to input mode for this question
+      setDiscoveryMode(currentQuestion.key);
+
+      setTimeout(() => {
+        switch (currentQuestion.key) {
+          case "website":
+            addAIMessage(
+              "Great! I'll analyze your website and extract your branding, content, and style.\n\nWhat's your website URL?",
+              undefined,
+              { type: "text", placeholder: "https://www.example.com", field: "businessName" }
+            );
+            break;
+          case "social":
+            addAIMessage(
+              "Nice! What's your main social media handle?\n\n(Instagram, Facebook, LinkedIn, or Twitter)",
+              undefined,
+              { type: "text", placeholder: "@yourbusiness or facebook.com/yourbusiness", field: "businessName" }
+            );
+            break;
+          case "domain":
+            addAIMessage(
+              "What's your domain name?",
+              undefined,
+              { type: "text", placeholder: "yourbusiness.com", field: "businessName" }
+            );
+            break;
+          case "email":
+            addAIMessage(
+              "What's your business email?",
+              undefined,
+              { type: "text", placeholder: "hello@yourbusiness.com", field: "businessName" }
+            );
+            break;
+        }
+      }, 300);
+    }
+  }, [discoveryQuestionIndex, addUserMessage, addAIMessage, moveToNextDiscoveryQuestion]);
+
+
+  const handleDiscoveryInput = async () => {
+    if (!currentInput.trim()) return;
+    const value = currentInput.trim();
+    setCurrentInput("");
+    addUserMessage(value);
+
+    if (discoveryMode === "website") {
+      updateData({ existingWebsite: value });
+      setIsAnalyzing(true);
+
+      // Show analyzing message
+      addAIMessage("🔍 Analyzing your website... Give me a moment to understand your business.");
+
+      try {
+        // Call API to scrape website
+        const scrapeRes = await fetch("/api/ai/analyze-website", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: value }),
+        });
+
+        if (!scrapeRes.ok) throw new Error("Scrape failed");
+
+        const scraped = await scrapeRes.json();
+        updateData({
+          scrapedData: scraped,
+          businessName: scraped.title || "",
+          businessDescription: scraped.description || "",
+        });
+
+        // Now call AI to understand the business
+        const understandRes = await fetch("/api/ai/understand-business", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ scrapedData: scraped }),
+        });
+
+        if (understandRes.ok) {
+          const understanding = await understandRes.json() as BusinessUnderstanding;
+          setAiUnderstanding(understanding);
+
+          // Update data with AI's understanding
+          updateData({
+            businessName: understanding.businessName || scraped.title || "",
+            businessDescription: scraped.description || "",
+            businessTagline: understanding.suggestedTagline || "",
+          });
+
+          // Build insights string
+          const insights = understanding.keyInsights?.filter(Boolean).slice(0, 3) || [];
+          const insightsText = insights.length > 0
+            ? `\n\n💡 I also noticed:\n${insights.map(i => `• ${i}`).join("\n")}`
+            : "";
+
+          // Show what AI understood
+          addAIMessage(
+            `Got it! Here's what I learned about your business:\n\n` +
+            `${understanding.summary}${insightsText}`
+          );
+
+          // Find the suggested type label
+          const suggestedType = businessTypeOptions.find(t => t.value === understanding.suggestedType);
+          const confidenceEmoji = understanding.confidence === "high" ? "✅" : understanding.confidence === "medium" ? "🤔" : "💭";
+
+          // After a delay, ask for confirmation of business type
+          setTimeout(() => {
+            if (suggestedType && understanding.confidence !== "low") {
+              addAIMessage(
+                `Based on your website, I think you're building a **${suggestedType.label}** website ${confidenceEmoji}\n\nIs that right?`,
+                [
+                  { id: "confirm-type", label: `Yes, that's right!`, value: "confirm", icon: "✅" },
+                  { id: "change-type", label: "No, let me choose", value: "choose", icon: "🔄" },
+                ]
+              );
+              setDiscoveryMode("confirm-type");
+            } else {
+              // Low confidence - ask them to choose
+              addAIMessage(
+                "I couldn't quite determine your website type. What kind of site are you building?",
+                businessTypeOptions
+              );
+              setDiscoveryMode(null);
+              setStep(0);
+            }
+          }, 1500);
+        } else {
+          // AI understanding failed, but we have scraped data - show basic info
+          addAIMessage(
+            `Found your website! 🎉\n\n` +
+            `📌 **${scraped.title || 'Your Website'}**\n` +
+            `${scraped.description ? `📝 "${scraped.description.substring(0, 100)}..."` : ''}`
+          );
+          setTimeout(() => moveToNextDiscoveryQuestion(), 1200);
+        }
+      } catch {
+        addAIMessage("I couldn't fully analyze that URL, but no worries! Let's continue.");
+        setTimeout(() => moveToNextDiscoveryQuestion(), 800);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    } else if (discoveryMode === "social") {
+      updateData({ existingSocials: { instagram: value } });
+      addAIMessage(`Got it! Noted: ${value} 📱`);
+      setTimeout(() => moveToNextDiscoveryQuestion(), 800);
+    } else if (discoveryMode === "domain") {
+      updateData({ existingDomain: value });
+      addAIMessage(`Perfect! Domain saved: ${value} 🔗`);
+      setTimeout(() => moveToNextDiscoveryQuestion(), 800);
+    } else if (discoveryMode === "email") {
+      updateData({ existingEmail: value });
+      addAIMessage(`Great! Email noted: ${value} 📧`);
+      setTimeout(() => moveToNextDiscoveryQuestion(), 800);
+    }
+  };
+
+  const handleEmailCheck = (option: Option) => {
+    addUserMessage(option.icon ? `${option.icon} ${option.label}` : option.label);
+
+    if (option.value === "yes") {
+      setDiscoveryMode("email-input");
+      setTimeout(() => {
+        addAIMessage(
+          "What's your business email?",
+          undefined,
+          { type: "text", placeholder: "hello@yourbusiness.com", field: "businessName" }
+        );
+      }, 300);
+    } else {
+      setStep(0);
+      setTimeout(() => {
+        addAIMessage(
+          "No problem! Let's continue.\n\nWhat type of website are you building?",
+          businessTypeOptions
+        );
+      }, 300);
+    }
+  };
+
   const handleOptionSelect = async (option: Option) => {
     addUserMessage(option.icon ? `${option.icon} ${option.label}` : option.label);
 
@@ -185,11 +452,22 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
         updateData({ businessType: option.value });
         setStep(1);
         setTimeout(() => {
-          addAIMessage(
-            `Great choice! ${option.icon} ${option.label} websites are one of my specialties.\n\nWhat's the name of your business?`,
-            undefined,
-            { type: "text", placeholder: "e.g., Mario's Italian Kitchen", field: "businessName" }
-          );
+          const nameFromScrape = data.scrapedData?.title || data.businessName;
+          if (nameFromScrape) {
+            addAIMessage(
+              `Great choice! ${option.icon} I see you're "${nameFromScrape}".\n\nIs this correct, or would you like to use a different name?`,
+              [
+                { id: "keep-name", label: `Keep "${nameFromScrape}"`, value: "keep", icon: "✅" },
+                { id: "change-name", label: "Use a different name", value: "change", icon: "✏️" },
+              ]
+            );
+          } else {
+            addAIMessage(
+              `Great choice! ${option.icon} ${option.label} websites are one of my specialties.\n\nWhat's the name of your business?`,
+              undefined,
+              { type: "text", placeholder: "e.g., Mario's Italian Kitchen", field: "businessName" }
+            );
+          }
         }, 300);
         break;
 
@@ -453,7 +731,75 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
                     <button
                       key={option.id}
                       onClick={() => {
-                        if (step === 4 || option.id.startsWith("tagline")) {
+                        // Handle yes/no discovery questions
+                        if (discoveryMode?.startsWith("ask-")) {
+                          handleDiscoveryYesNo(option.value as "yes" | "no");
+                        } else if (discoveryMode === "email-check") {
+                          handleEmailCheck(option);
+                        } else if (discoveryMode === "confirm-type") {
+                          // AI suggested a business type, user confirms or wants to choose
+                          addUserMessage(option.icon ? `${option.icon} ${option.label}` : option.label);
+                          if (option.value === "confirm" && aiUnderstanding?.suggestedType) {
+                            // User confirmed AI's suggestion
+                            updateData({ businessType: aiUnderstanding.suggestedType });
+                            // Continue with remaining discovery questions
+                            setTimeout(() => moveToNextDiscoveryQuestion(), 300);
+                          } else {
+                            // User wants to choose their own type - continue discovery first
+                            setTimeout(() => moveToNextDiscoveryQuestion(), 300);
+                          }
+                        } else if (option.value === "keep" || option.value === "change") {
+                          // Name confirmation after scrape
+                          addUserMessage(option.icon ? `${option.icon} ${option.label}` : option.label);
+                          if (option.value === "keep") {
+                            setStep(2);
+                            setTimeout(() => {
+                              const descFromScrape = data.scrapedData?.description || data.businessDescription;
+                              if (descFromScrape) {
+                                addAIMessage(
+                                  `I found this description:\n\n"${descFromScrape.substring(0, 150)}..."\n\nWant to keep it or write something new?`,
+                                  [
+                                    { id: "keep-desc", label: "Keep this description", value: "keep-desc", icon: "✅" },
+                                    { id: "change-desc", label: "Write something new", value: "change-desc", icon: "✏️" },
+                                  ]
+                                );
+                              } else {
+                                addAIMessage(
+                                  `Great! Now, tell me a bit about what makes your business special. What do you do and who do you serve?`,
+                                  undefined,
+                                  { type: "textarea", placeholder: "We're a family-owned bakery specializing in artisan sourdough...", field: "businessDescription" }
+                                );
+                              }
+                            }, 300);
+                          } else {
+                            setTimeout(() => {
+                              addAIMessage(
+                                `No problem! What's the name of your business?`,
+                                undefined,
+                                { type: "text", placeholder: "e.g., Mario's Italian Kitchen", field: "businessName" }
+                              );
+                            }, 300);
+                          }
+                        } else if (option.value === "keep-desc" || option.value === "change-desc") {
+                          addUserMessage(option.icon ? `${option.icon} ${option.label}` : option.label);
+                          if (option.value === "keep-desc") {
+                            setStep(3);
+                            setTimeout(() => {
+                              addAIMessage(
+                                `Perfect! Now let's pick your brand colors. Which vibe fits best?`,
+                                colorPresetOptions
+                              );
+                            }, 300);
+                          } else {
+                            setTimeout(() => {
+                              addAIMessage(
+                                `Tell me about your business in your own words:`,
+                                undefined,
+                                { type: "textarea", placeholder: "We're a family-owned bakery specializing in artisan sourdough...", field: "businessDescription" }
+                              );
+                            }, 300);
+                          }
+                        } else if (step === 4 || option.id.startsWith("tagline")) {
                           handleTaglineSelect(option);
                         } else if (step === 5 || option.value === "generate" || option.value === "edit") {
                           handleFinalAction(option);
@@ -462,12 +808,14 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
                         }
                       }}
                       disabled={isGenerating}
-                      className="flex items-center gap-4 rounded-2xl border-2 border-stone-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 text-left transition-all hover:border-primary hover:bg-violet-50 dark:hover:bg-slate-700 hover:shadow-md disabled:opacity-50 animate-in fade-in slide-in-from-bottom-2 duration-300"
+                      className="flex items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all hover:shadow-md disabled:opacity-50 animate-in fade-in slide-in-from-bottom-2 duration-300 border-stone-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-primary hover:bg-violet-50 dark:hover:bg-slate-700"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
                       {option.icon && <span className="text-3xl">{option.icon}</span>}
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-base">{option.label}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-base">{option.label}</span>
+                        </div>
                         {option.description && (
                           <div className="text-sm text-muted-foreground mt-0.5">{option.description}</div>
                         )}
@@ -490,7 +838,7 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
-                          handleInputSubmit();
+                          discoveryMode ? handleDiscoveryInput() : handleInputSubmit();
                         }
                       }}
                     />
@@ -503,14 +851,14 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
                       className="w-full rounded-2xl border-2 border-stone-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-5 py-4 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                          handleInputSubmit();
+                          discoveryMode ? handleDiscoveryInput() : handleInputSubmit();
                         }
                       }}
                     />
                   )}
                   <button
-                    onClick={handleInputSubmit}
-                    disabled={!currentInput.trim() || isGenerating}
+                    onClick={() => discoveryMode ? handleDiscoveryInput() : handleInputSubmit()}
+                    disabled={!currentInput.trim() || isGenerating || isAnalyzing}
                     className="mt-3 rounded-xl bg-primary px-6 py-3 text-base font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all hover:shadow-md"
                   >
                     Continue →
@@ -527,12 +875,12 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
       <div className="border-t border-stone-200 dark:border-slate-700 p-4 bg-[#fdfcfa] dark:bg-slate-800/50 rounded-b-3xl">
         <div className="flex justify-between text-xs text-stone-500 dark:text-slate-400 mb-2">
           <span>Progress</span>
-          <span>{Math.min(Math.round((step / 5) * 100), 100)}%</span>
+          <span>{Math.min(Math.round(((step + 1) / 6) * 100), 100)}%</span>
         </div>
         <div className="h-2 bg-stone-200 dark:bg-slate-700 rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-violet-500 to-purple-500 transition-all duration-500"
-            style={{ width: `${Math.min((step / 5) * 100, 100)}%` }}
+            style={{ width: `${Math.min(((step + 1) / 6) * 100, 100)}%` }}
           />
         </div>
       </div>
