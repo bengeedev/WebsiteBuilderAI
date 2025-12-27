@@ -92,6 +92,31 @@ const colorPresetOptions: Option[] = [
   { id: "pink-playful", label: "Playful Pink", value: "#db2777,#1f2937", icon: <CircleDot className="w-6 h-6 text-pink-500 fill-pink-500" /> },
 ];
 
+// Helper to get pipeline defaults for a business type
+async function getPipelineDefaults(businessType: string): Promise<{
+  primaryColor: string;
+  secondaryColor: string;
+  headingFont: string;
+  bodyFont: string;
+} | null> {
+  try {
+    const res = await fetch("/api/pipeline", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "get_defaults",
+        data: { businessType },
+      }),
+    });
+    if (res.ok) {
+      return res.json();
+    }
+  } catch (e) {
+    console.error("Failed to get pipeline defaults:", e);
+  }
+  return null;
+}
+
 type Props = {
   initialData: OnboardingData;
   onComplete: (data: OnboardingData) => void;
@@ -472,6 +497,19 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
     switch (step) {
       case 0: // Business type selected
         updateData({ businessType: option.value });
+
+        // Fetch pipeline defaults for this business type
+        const defaults = await getPipelineDefaults(option.value);
+        if (defaults) {
+          updateData({
+            primaryColor: defaults.primaryColor,
+            secondaryColor: defaults.secondaryColor,
+            headingFont: defaults.headingFont,
+            bodyFont: defaults.bodyFont,
+          });
+          console.log("[Pipeline] Applied defaults for", option.value, defaults);
+        }
+
         setStep(1);
         setTimeout(() => {
           const nameFromScrape = data.scrapedData?.title || data.businessName;
@@ -529,9 +567,25 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
         updateData({ businessDescription: value });
         setStep(3);
         setTimeout(() => {
+          // Build color options with recommended first
+          let colorOptions = [...colorPresetOptions];
+          if (data.primaryColor) {
+            // Find if current color matches a preset
+            const matchingPreset = colorPresetOptions.find(
+              (c) => c.value.startsWith(data.primaryColor!)
+            );
+            if (matchingPreset) {
+              // Move matching preset to first and mark as recommended
+              colorOptions = [
+                { ...matchingPreset, label: `${matchingPreset.label} (Recommended)` },
+                ...colorPresetOptions.filter((c) => c.id !== matchingPreset.id),
+              ];
+            }
+          }
+
           addAIMessage(
             `Perfect! I'm getting a great picture of your business. \n\nNow let's pick your brand colors. Which vibe fits "${data.businessName || 'your business'}" best?`,
-            colorPresetOptions
+            colorOptions
           );
         }, 300);
         break;
