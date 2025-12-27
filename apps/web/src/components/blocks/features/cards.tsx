@@ -1,0 +1,72 @@
+"use client";
+
+import React from "react";
+import { cn } from "@repo/ui";
+import type { FeaturesVariantProps } from "./index";
+import { SectionHeader, FeatureIcon } from "./index";
+
+export function FeaturesCards({ content, className }: FeaturesVariantProps) {
+  const columns = content.features.length <= 3 ? 3 : content.features.length <= 4 ? 2 : 3;
+
+  return (
+    <div className={className}>
+      <SectionHeader
+        title={content.title}
+        subtitle={content.subtitle}
+        description={content.description}
+      />
+
+      <div
+        className={cn(
+          "grid gap-6",
+          columns === 2 && "md:grid-cols-2",
+          columns === 3 && "md:grid-cols-2 lg:grid-cols-3"
+        )}
+      >
+        {content.features.map((feature, index) => (
+          <div
+            key={index}
+            className={cn(
+              "group p-6 rounded-xl",
+              "bg-[var(--color-surface)] border border-[var(--color-border)]",
+              "shadow-sm hover:shadow-md transition-shadow duration-200"
+            )}
+          >
+            {feature.icon && (
+              <div className="mb-4">
+                <FeatureIcon icon={feature.icon} />
+              </div>
+            )}
+            <h3 className="text-xl font-semibold text-[var(--color-text-primary)] mb-2 font-[var(--font-heading)]">
+              {feature.title}
+            </h3>
+            <p className="text-[var(--color-text-secondary)]">
+              {feature.description}
+            </p>
+            {feature.link && (
+              <a
+                href={feature.link.url}
+                className="inline-flex items-center mt-4 text-sm font-medium text-[var(--color-primary)] hover:underline"
+              >
+                {feature.link.text}
+                <svg
+                  className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </a>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
