@@ -8,6 +8,7 @@
 import type { SiteState } from "../actions/executor";
 import type { SectionContent } from "../types";
 import type { Capability, UserContext } from "./types";
+import type { AIMemoryContext } from "../memory";
 import { getAvailableCapabilities, capabilityGroups } from "./registry";
 
 /**
@@ -24,6 +25,8 @@ export type PromptContext = {
     type: string;
     description?: string;
   };
+  /** AI memory context */
+  memoryContext?: AIMemoryContext;
   /** Additional context or instructions */
   additionalContext?: string;
 };
@@ -37,6 +40,7 @@ export function buildSystemPrompt(context: PromptContext): string {
   const sections = [
     buildIdentitySection(),
     buildCapabilitiesSection(availableCapabilities),
+    buildMemorySection(context.memoryContext),
     buildSiteStateSection(context.siteState),
     buildBusinessSection(context.businessInfo),
     buildInstructionsSection(),
@@ -45,6 +49,14 @@ export function buildSystemPrompt(context: PromptContext): string {
   ];
 
   return sections.filter(Boolean).join("\n\n");
+}
+
+/**
+ * Build the full system prompt for the AI with memory context
+ * (Alias for buildSystemPrompt that ensures memory is included)
+ */
+export function buildSystemPromptWithMemory(context: PromptContext): string {
+  return buildSystemPrompt(context);
 }
 
 /**
@@ -232,6 +244,133 @@ function buildToolUsageSection(capabilities: Capability[]): string {
   }
 
   return content;
+}
+
+/**
+ * Build the memory context section
+ */
+function buildMemorySection(memoryContext?: AIMemoryContext): string {
+  if (!memoryContext) {
+    return "";
+  }
+
+  const sections: string[] = [];
+
+  // User preferences section
+  if (memoryContext.user) {
+    const userSection: string[] = [];
+
+    if (memoryContext.user.stylePreferences) {
+      const { preferredColors, preferredFonts, designStyle } = memoryContext.user.stylePreferences;
+      if (preferredColors && preferredColors.length > 0) {
+        userSection.push(`- Preferred colors: ${preferredColors.join(", ")}`);
+      }
+      if (preferredFonts) {
+        userSection.push(`- Preferred fonts: ${preferredFonts.heading} (headings), ${preferredFonts.body} (body)`);
+      }
+      if (designStyle) {
+        userSection.push(`- Design style preference: ${designStyle}`);
+      }
+    }
+
+    if (memoryContext.user.interactionPatterns) {
+      const { responseStyle, helpLevel } = memoryContext.user.interactionPatterns;
+      if (responseStyle) {
+        userSection.push(`- User prefers ${responseStyle} responses`);
+      }
+      if (helpLevel) {
+        userSection.push(`- Skill level: ${helpLevel}`);
+      }
+    }
+
+    if (userSection.length > 0) {
+      sections.push(`### User Preferences\n${userSection.join("\n")}`);
+    }
+  }
+
+  // Project context section
+  if (memoryContext.project) {
+    const projectSection: string[] = [];
+
+    if (memoryContext.project.businessDetails) {
+      const { name, type, description, targetAudience, goals } = memoryContext.project.businessDetails;
+      if (name) projectSection.push(`- Business name: ${name}`);
+      if (type) projectSection.push(`- Business type: ${type}`);
+      if (description) projectSection.push(`- Description: ${description}`);
+      if (targetAudience && targetAudience.length > 0) {
+        projectSection.push(`- Target audience: ${targetAudience.join(", ")}`);
+      }
+      if (goals && goals.length > 0) {
+        projectSection.push(`- Business goals: ${goals.join(", ")}`);
+      }
+    }
+
+    if (memoryContext.project.discoveredInfo) {
+      const { existingWebsite, socialLinks, contactInfo } = memoryContext.project.discoveredInfo;
+      if (existingWebsite?.url) {
+        projectSection.push(`- Existing website: ${existingWebsite.url}`);
+      }
+      if (socialLinks && Object.keys(socialLinks).length > 0) {
+        const links = Object.entries(socialLinks)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(", ");
+        projectSection.push(`- Social links: ${links}`);
+      }
+      if (contactInfo?.email) {
+        projectSection.push(`- Contact email: ${contactInfo.email}`);
+      }
+    }
+
+    if (memoryContext.project.siteGoals && memoryContext.project.siteGoals.length > 0) {
+      const goals = memoryContext.project.siteGoals
+        .filter((g) => g.status === "pending")
+        .map((g) => `${g.goal} (${g.priority})`)
+        .join(", ");
+      if (goals) {
+        projectSection.push(`- Site goals: ${goals}`);
+      }
+    }
+
+    if (projectSection.length > 0) {
+      sections.push(`### Project Context\n${projectSection.join("\n")}`);
+    }
+  }
+
+  // Session state section
+  if (memoryContext.session) {
+    const sessionSection: string[] = [];
+
+    if (memoryContext.session.currentTasks && memoryContext.session.currentTasks.length > 0) {
+      const tasks = memoryContext.session.currentTasks
+        .filter((t) => t.status !== "completed")
+        .map((t) => `- [${t.status}] ${t.task}`)
+        .join("\n");
+      if (tasks) {
+        sessionSection.push(`**Current Tasks:**\n${tasks}`);
+      }
+    }
+
+    if (memoryContext.session.pendingQuestions && memoryContext.session.pendingQuestions.length > 0) {
+      const questions = memoryContext.session.pendingQuestions
+        .map((q) => `- ${q.question} (field: ${q.field}, required: ${q.required})`)
+        .join("\n");
+      sessionSection.push(`**Pending Questions (ASK BEFORE PROCEEDING):**\n${questions}`);
+    }
+
+    if (memoryContext.session.wipState?.currentStep) {
+      sessionSection.push(`**Current Step:** ${memoryContext.session.wipState.currentStep}`);
+    }
+
+    if (sessionSection.length > 0) {
+      sections.push(`### Session State\n${sessionSection.join("\n\n")}`);
+    }
+  }
+
+  if (sections.length === 0) {
+    return "";
+  }
+
+  return `## AI Memory Context\n\n${sections.join("\n\n")}`;
 }
 
 /**

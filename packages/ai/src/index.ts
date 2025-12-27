@@ -121,3 +121,21 @@ export {
   type MessageRole,
   type ChatMessageData,
 } from "./memory";
+
+// Pipeline
+export {
+  PipelineOrchestrator,
+  InputValidator,
+  PIPELINE_STEPS,
+  INPUT_REQUIREMENTS,
+  BUSINESS_TYPE_DEFAULTS,
+  FONT_RECOMMENDATIONS,
+  type OrchestratorConfig,
+  type ValidationResult,
+  type PipelineStep,
+  type PipelineState,
+  type PipelineEvent,
+  type StepConfig,
+  type InputRequirement,
+  type FallbackStrategy,
+} from "./pipeline";

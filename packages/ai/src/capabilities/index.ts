@@ -35,6 +35,7 @@ export {
 export type { PromptContext } from "./prompt-builder";
 export {
   buildSystemPrompt,
+  buildSystemPromptWithMemory,
   buildMinimalPrompt,
   buildOnboardingSuggestionPrompt,
   buildSEOAnalysisPrompt,
