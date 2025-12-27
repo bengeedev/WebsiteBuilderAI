@@ -1,8 +1,30 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import type { OnboardingData } from "@/app/(dashboard)/projects/new/page";
+import {
+  Globe,
+  Smartphone,
+  Link,
+  Mail,
+  Check,
+  X,
+  UtensilsCrossed,
+  Palette,
+  Briefcase,
+  ShoppingBag,
+  PenLine,
+  Dumbbell,
+  CircleDot,
+  Pencil,
+  Rocket,
+  Sparkles,
+  RotateCcw,
+  Lightbulb,
+  Search,
+  User,
+} from "lucide-react";
 
 type Message = {
   id: string;
@@ -29,7 +51,7 @@ type Option = {
   id: string;
   label: string;
   value: string;
-  icon?: string;
+  icon?: ReactNode;
   description?: string;
 };
 
@@ -40,34 +62,34 @@ type InputConfig = {
 };
 
 const businessTypeOptions: Option[] = [
-  { id: "restaurant", label: "Restaurant & Food", value: "restaurant", icon: "🍽️", description: "Restaurants, cafes, food trucks" },
-  { id: "portfolio", label: "Portfolio & Creative", value: "portfolio", icon: "🎨", description: "Artists, designers, photographers" },
-  { id: "business", label: "Business & Services", value: "business", icon: "💼", description: "Consulting, agencies, services" },
-  { id: "ecommerce", label: "E-commerce & Shop", value: "ecommerce", icon: "🛍️", description: "Online stores, products" },
-  { id: "blog", label: "Blog & Content", value: "blog", icon: "✍️", description: "Blogs, news, content creators" },
-  { id: "fitness", label: "Fitness & Health", value: "fitness", icon: "💪", description: "Gyms, trainers, wellness" },
+  { id: "restaurant", label: "Restaurant & Food", value: "restaurant", icon: <UtensilsCrossed className="w-6 h-6" />, description: "Restaurants, cafes, food trucks" },
+  { id: "portfolio", label: "Portfolio & Creative", value: "portfolio", icon: <Palette className="w-6 h-6" />, description: "Artists, designers, photographers" },
+  { id: "business", label: "Business & Services", value: "business", icon: <Briefcase className="w-6 h-6" />, description: "Consulting, agencies, services" },
+  { id: "ecommerce", label: "E-commerce & Shop", value: "ecommerce", icon: <ShoppingBag className="w-6 h-6" />, description: "Online stores, products" },
+  { id: "blog", label: "Blog & Content", value: "blog", icon: <PenLine className="w-6 h-6" />, description: "Blogs, news, content creators" },
+  { id: "fitness", label: "Fitness & Health", value: "fitness", icon: <Dumbbell className="w-6 h-6" />, description: "Gyms, trainers, wellness" },
 ];
 
 const yesNoOptions: Option[] = [
-  { id: "yes", label: "Yes", value: "yes", icon: "✅" },
-  { id: "no", label: "No", value: "no", icon: "❌" },
+  { id: "yes", label: "Yes", value: "yes", icon: <Check className="w-5 h-5 text-green-500" /> },
+  { id: "no", label: "No", value: "no", icon: <X className="w-5 h-5 text-red-500" /> },
 ];
 
 // Discovery questions in order
-const discoveryQuestions = [
-  { key: "website", question: "Do you have an existing website you'd like me to analyze and improve?", icon: "🌐" },
-  { key: "social", question: "Do you have social media accounts for your business?", icon: "📱" },
-  { key: "domain", question: "Do you already own a domain name?", icon: "🔗" },
-  { key: "email", question: "Do you have a business email address?", icon: "📧" },
+const discoveryQuestions: Array<{ key: string; question: string; icon: ReactNode }> = [
+  { key: "website", question: "Do you have an existing website you'd like me to analyze and improve?", icon: <Globe className="w-5 h-5 inline-block mr-2" /> },
+  { key: "social", question: "Do you have social media accounts for your business?", icon: <Smartphone className="w-5 h-5 inline-block mr-2" /> },
+  { key: "domain", question: "Do you already own a domain name?", icon: <Link className="w-5 h-5 inline-block mr-2" /> },
+  { key: "email", question: "Do you have a business email address?", icon: <Mail className="w-5 h-5 inline-block mr-2" /> },
 ];
 
 const colorPresetOptions: Option[] = [
-  { id: "blue-pro", label: "Professional Blue", value: "#2563eb,#1e293b", icon: "🔵" },
-  { id: "purple-creative", label: "Creative Purple", value: "#7c3aed,#1f2937", icon: "🟣" },
-  { id: "green-nature", label: "Nature Green", value: "#059669,#064e3b", icon: "🟢" },
-  { id: "red-bold", label: "Bold Red", value: "#dc2626,#1f2937", icon: "🔴" },
-  { id: "orange-warm", label: "Warm Orange", value: "#ea580c,#292524", icon: "🟠" },
-  { id: "pink-playful", label: "Playful Pink", value: "#db2777,#1f2937", icon: "💗" },
+  { id: "blue-pro", label: "Professional Blue", value: "#2563eb,#1e293b", icon: <CircleDot className="w-6 h-6 text-blue-500 fill-blue-500" /> },
+  { id: "purple-creative", label: "Creative Purple", value: "#7c3aed,#1f2937", icon: <CircleDot className="w-6 h-6 text-purple-500 fill-purple-500" /> },
+  { id: "green-nature", label: "Nature Green", value: "#059669,#064e3b", icon: <CircleDot className="w-6 h-6 text-emerald-500 fill-emerald-500" /> },
+  { id: "red-bold", label: "Bold Red", value: "#dc2626,#1f2937", icon: <CircleDot className="w-6 h-6 text-red-500 fill-red-500" /> },
+  { id: "orange-warm", label: "Warm Orange", value: "#ea580c,#292524", icon: <CircleDot className="w-6 h-6 text-orange-500 fill-orange-500" /> },
+  { id: "pink-playful", label: "Playful Pink", value: "#db2777,#1f2937", icon: <CircleDot className="w-6 h-6 text-pink-500 fill-pink-500" /> },
 ];
 
 type Props = {
@@ -142,7 +164,7 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
     if (!hasStarted) {
       setHasStarted(true);
       const firstQuestion = discoveryQuestions[0];
-      const welcomeContent = `Hey! 👋 I'm your AI website builder. Let me learn a bit about you first.\n\n${firstQuestion.icon} ${firstQuestion.question}`;
+      const welcomeContent = `Hey! I'm your AI website builder. Let me learn a bit about you first.\n\n${firstQuestion.question}`;
       setDiscoveryMode("ask-" + firstQuestion.key);
       setMessages([{
         id: "welcome",
@@ -220,15 +242,15 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
           const nameFromData = aiUnderstanding?.businessName || data.businessName;
           if (nameFromData) {
             addAIMessage(
-              `Perfect! Now let's confirm your details. ✨\n\nI've got you as "${nameFromData}".\n\nIs this correct?`,
+              `Perfect! Now let's confirm your details.\n\nI've got you as "${nameFromData}".\n\nIs this correct?`,
               [
-                { id: "keep-name", label: `Keep "${nameFromData}"`, value: "keep", icon: "✅" },
-                { id: "change-name", label: "Use a different name", value: "change", icon: "✏️" },
+                { id: "keep-name", label: `Keep "${nameFromData}"`, value: "keep", icon: <Check className="w-5 h-5 text-green-500" /> },
+                { id: "change-name", label: "Use a different name", value: "change", icon: <Pencil className="w-5 h-5" /> },
               ]
             );
           } else {
             addAIMessage(
-              `Perfect! Now let's build your site. ✨\n\nWhat's the name of your business?`,
+              `Perfect! Now let's build your site.\n\nWhat's the name of your business?`,
               undefined,
               { type: "text", placeholder: "e.g., Mario's Italian Kitchen", field: "businessName" }
             );
@@ -239,7 +261,7 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
         setStep(0);
         setTimeout(() => {
           addAIMessage(
-            "Great! Now I have a better picture. ✨\n\nWhat type of website are you building?",
+            "Great! Now I have a better picture.\n\nWhat type of website are you building?",
             businessTypeOptions
           );
         }, 300);
@@ -251,7 +273,7 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
       setDiscoveryMode("ask-" + nextQuestion.key);
       setTimeout(() => {
         addAIMessage(
-          `${nextQuestion.icon} ${nextQuestion.question}`,
+          nextQuestion.question,
           yesNoOptions
         );
       }, 300);
@@ -317,7 +339,7 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
       setIsAnalyzing(true);
 
       // Show analyzing message
-      addAIMessage("🔍 Analyzing your website... Give me a moment to understand your business.");
+      addAIMessage("Analyzing your website... Give me a moment to understand your business.");
 
       try {
         // Call API to scrape website
@@ -357,7 +379,7 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
           // Build insights string
           const insights = understanding.keyInsights?.filter(Boolean).slice(0, 3) || [];
           const insightsText = insights.length > 0
-            ? `\n\n💡 I also noticed:\n${insights.map(i => `• ${i}`).join("\n")}`
+            ? `\n\nI also noticed:\n${insights.map(i => `• ${i}`).join("\n")}`
             : "";
 
           // Show what AI understood
@@ -368,16 +390,16 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
 
           // Find the suggested type label
           const suggestedType = businessTypeOptions.find(t => t.value === understanding.suggestedType);
-          const confidenceEmoji = understanding.confidence === "high" ? "✅" : understanding.confidence === "medium" ? "🤔" : "💭";
+          const confidenceText = understanding.confidence === "high" ? "(high confidence)" : understanding.confidence === "medium" ? "(I think)" : "";
 
           // After a delay, ask for confirmation of business type
           setTimeout(() => {
             if (suggestedType && understanding.confidence !== "low") {
               addAIMessage(
-                `Based on your website, I think you're building a **${suggestedType.label}** website ${confidenceEmoji}\n\nIs that right?`,
+                `Based on your website, I think you're building a **${suggestedType.label}** website ${confidenceText}\n\nIs that right?`,
                 [
-                  { id: "confirm-type", label: `Yes, that's right!`, value: "confirm", icon: "✅" },
-                  { id: "change-type", label: "No, let me choose", value: "choose", icon: "🔄" },
+                  { id: "confirm-type", label: `Yes, that's right!`, value: "confirm", icon: <Check className="w-5 h-5 text-green-500" /> },
+                  { id: "change-type", label: "No, let me choose", value: "choose", icon: <RotateCcw className="w-5 h-5" /> },
                 ]
               );
               setDiscoveryMode("confirm-type");
@@ -394,9 +416,9 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
         } else {
           // AI understanding failed, but we have scraped data - show basic info
           addAIMessage(
-            `Found your website! 🎉\n\n` +
-            `📌 **${scraped.title || 'Your Website'}**\n` +
-            `${scraped.description ? `📝 "${scraped.description.substring(0, 100)}..."` : ''}`
+            `Found your website!\n\n` +
+            `**${scraped.title || 'Your Website'}**\n` +
+            `${scraped.description ? `"${scraped.description.substring(0, 100)}..."` : ''}`
           );
           setTimeout(() => moveToNextDiscoveryQuestion(), 1200);
         }
@@ -408,15 +430,15 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
       }
     } else if (discoveryMode === "social") {
       updateData({ existingSocials: { instagram: value } });
-      addAIMessage(`Got it! Noted: ${value} 📱`);
+      addAIMessage(`Got it! Noted: ${value}`);
       setTimeout(() => moveToNextDiscoveryQuestion(), 800);
     } else if (discoveryMode === "domain") {
       updateData({ existingDomain: value });
-      addAIMessage(`Perfect! Domain saved: ${value} 🔗`);
+      addAIMessage(`Perfect! Domain saved: ${value}`);
       setTimeout(() => moveToNextDiscoveryQuestion(), 800);
     } else if (discoveryMode === "email") {
       updateData({ existingEmail: value });
-      addAIMessage(`Great! Email noted: ${value} 📧`);
+      addAIMessage(`Great! Email noted: ${value}`);
       setTimeout(() => moveToNextDiscoveryQuestion(), 800);
     }
   };
@@ -455,15 +477,15 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
           const nameFromScrape = data.scrapedData?.title || data.businessName;
           if (nameFromScrape) {
             addAIMessage(
-              `Great choice! ${option.icon} I see you're "${nameFromScrape}".\n\nIs this correct, or would you like to use a different name?`,
+              `Great choice! I see you're "${nameFromScrape}".\n\nIs this correct, or would you like to use a different name?`,
               [
-                { id: "keep-name", label: `Keep "${nameFromScrape}"`, value: "keep", icon: "✅" },
-                { id: "change-name", label: "Use a different name", value: "change", icon: "✏️" },
+                { id: "keep-name", label: `Keep "${nameFromScrape}"`, value: "keep", icon: <Check className="w-5 h-5 text-green-500" /> },
+                { id: "change-name", label: "Use a different name", value: "change", icon: <Pencil className="w-5 h-5" /> },
               ]
             );
           } else {
             addAIMessage(
-              `Great choice! ${option.icon} ${option.label} websites are one of my specialties.\n\nWhat's the name of your business?`,
+              `Great choice! ${option.label} websites are one of my specialties.\n\nWhat's the name of your business?`,
               undefined,
               { type: "text", placeholder: "e.g., Mario's Italian Kitchen", field: "businessName" }
             );
@@ -495,7 +517,7 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
         setStep(2);
         setTimeout(() => {
           addAIMessage(
-            `"${value}" - love it! ✨\n\nNow, tell me a bit about what makes your business special. What do you do and who do you serve?`,
+            `"${value}" - love it! \n\nNow, tell me a bit about what makes your business special. What do you do and who do you serve?`,
             undefined,
             { type: "textarea", placeholder: "We're a family-owned bakery specializing in artisan sourdough...", field: "businessDescription" }
           );
@@ -508,7 +530,7 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
         setStep(3);
         setTimeout(() => {
           addAIMessage(
-            `Perfect! I'm getting a great picture of your business. 🎨\n\nNow let's pick your brand colors. Which vibe fits "${data.businessName || 'your business'}" best?`,
+            `Perfect! I'm getting a great picture of your business. \n\nNow let's pick your brand colors. Which vibe fits "${data.businessName || 'your business'}" best?`,
             colorPresetOptions
           );
         }, 300);
@@ -556,8 +578,9 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
         // Add custom option
         taglineOptions.push({
           id: "tagline-custom",
-          label: "✏️ Write my own tagline",
+          label: "Write my own tagline",
           value: "__custom__",
+          icon: <Pencil className="w-5 h-5" />,
         });
 
         setTimeout(() => {
@@ -576,7 +599,7 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
         { id: "t1", label: `Quality ${data.businessType} you can trust`, value: `Quality ${data.businessType} you can trust` },
         { id: "t2", label: `Your success is our mission`, value: `Your success is our mission` },
         { id: "t3", label: `Excellence in every detail`, value: `Excellence in every detail` },
-        { id: "tagline-custom", label: "✏️ Write my own tagline", value: "__custom__" },
+        { id: "tagline-custom", label: "Write my own tagline", value: "__custom__", icon: <Pencil className="w-5 h-5" /> },
       ];
 
       setTimeout(() => {
@@ -606,7 +629,7 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
 
   const showFinalPreview = () => {
     addAIMessage(
-      `Amazing! 🚀 Here's what I've got:\n\n` +
+      `Amazing! Here's what I've got:\n\n` +
       `**${data.businessName}**\n` +
       `"${data.businessTagline || 'Your tagline here'}"\n\n` +
       `I'm ready to generate your complete website with:\n` +
@@ -617,8 +640,8 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
       `• And more!\n\n` +
       `Ready to see the magic?`,
       [
-        { id: "generate", label: "🚀 Generate My Website!", value: "generate", description: "Takes about 10 seconds" },
-        { id: "edit", label: "✏️ Go back and edit", value: "edit" },
+        { id: "generate", label: "Generate My Website!", value: "generate", description: "Takes about 10 seconds", icon: <Rocket className="w-5 h-5" /> },
+        { id: "edit", label: "Go back and edit", value: "edit", icon: <Pencil className="w-5 h-5" /> },
       ]
     );
   };
@@ -631,10 +654,10 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
       return;
     }
 
-    addUserMessage("🚀 Generate My Website!");
+    addUserMessage("Generate My Website!");
     setIsGenerating(true);
 
-    addAIMessage("On it! Creating your website now... ✨");
+    addAIMessage("On it! Creating your website now...");
 
     try {
       // Create project
@@ -656,7 +679,7 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
 
       if (!generateRes.ok) throw new Error("Failed to generate site");
 
-      addAIMessage("🎉 Your website is ready! Redirecting you now...");
+      addAIMessage("Your website is ready! Redirecting you now...");
 
       setTimeout(() => {
         router.push(`/projects/${project.id}/dashboard`);
@@ -665,7 +688,7 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
     } catch (error) {
       console.error("Generation error:", error);
       addAIMessage("Oops! Something went wrong. Let me try again...", [
-        { id: "retry", label: "🔄 Try Again", value: "generate" },
+        { id: "retry", label: "Try Again", value: "generate", icon: <RotateCcw className="w-5 h-5" /> },
       ]);
       setIsGenerating(false);
     }
@@ -692,12 +715,12 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
             <div className={`max-w-[85%] ${message.role === "user" ? "order-1" : ""}`}>
               {/* Avatar */}
               <div className={`flex items-start gap-4 ${message.role === "user" ? "flex-row-reverse" : ""}`}>
-                <div className={`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 text-xl ${
+                <div className={`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 ${
                   message.role === "ai"
                     ? "bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shadow-purple-500/25"
                     : "bg-gray-200 dark:bg-gray-700"
                 }`}>
-                  {message.role === "ai" ? "✨" : "👤"}
+                  {message.role === "ai" ? <Sparkles className="w-5 h-5" /> : <User className="w-5 h-5" />}
                 </div>
 
                 <div className={`rounded-2xl px-5 py-4 ${
@@ -759,8 +782,8 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
                                 addAIMessage(
                                   `I found this description:\n\n"${descFromScrape.substring(0, 150)}..."\n\nWant to keep it or write something new?`,
                                   [
-                                    { id: "keep-desc", label: "Keep this description", value: "keep-desc", icon: "✅" },
-                                    { id: "change-desc", label: "Write something new", value: "change-desc", icon: "✏️" },
+                                    { id: "keep-desc", label: "Keep this description", value: "keep-desc", icon: <Check className="w-5 h-5 text-green-500" /> },
+                                    { id: "change-desc", label: "Write something new", value: "change-desc", icon: <Pencil className="w-5 h-5" /> },
                                   ]
                                 );
                               } else {
@@ -811,7 +834,7 @@ export function ConversationalWizard({ initialData, onComplete }: Props) {
                       className="flex items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all hover:shadow-md disabled:opacity-50 animate-in fade-in slide-in-from-bottom-2 duration-300 border-stone-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-primary hover:bg-violet-50 dark:hover:bg-slate-700"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      {option.icon && <span className="text-3xl">{option.icon}</span>}
+                      {option.icon && <span className="flex-shrink-0">{option.icon}</span>}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-base">{option.label}</span>
