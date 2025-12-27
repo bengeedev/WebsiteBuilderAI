@@ -100,3 +100,6 @@ export {
   getRecommendedTemplate,
   getTemplateCount,
 } from "./templates";
+
+// Block system (new composable architecture)
+export * from "./blocks";
